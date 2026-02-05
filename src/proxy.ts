@@ -29,7 +29,7 @@ function copyCookies(from: NextResponse, to: NextResponse) {
   return to;
 }
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { supabase, supabaseResponse } = createClientMiddleware(req);
   const { pathname, search } = req.nextUrl;
 
