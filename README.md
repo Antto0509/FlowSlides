@@ -123,6 +123,60 @@ FlowSlides est construit avec une stack moderne, fiable et scalable :
 - **Stripe** — Paiements et abonnements
 - **Vercel** — Déploiement et performance
 
+[![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/colored.png)](#-architecture)
+
+## ➤ Architecture
+
+```txt
+src/
+├─ app/
+│  ├─ layout.tsx
+│  ├─ page.tsx                // landing simple
+│  ├─ editor/
+│  │  ├─ page.tsx             // orchestrateur
+│  │  └─ loading.tsx
+│  └─ api/
+│     ├─ hook/
+│     │  └─ route.ts
+│     └─ carousel/
+│        └─ route.ts
+│
+├─ components/
+│  ├─ editor/
+│  │  ├─ StepInputs.tsx
+│  │  ├─ StepHook.tsx
+│  │  ├─ StepTemplate.tsx
+│  │  ├─ StepCarousel.tsx
+│  │  └─ StepExport.tsx
+│  │
+│  ├─ ui/                     // shadcn (ne touche pas)
+│  └─ common/
+│     ├─ Button.tsx
+│     └─ Guard.tsx
+│
+├─ store/
+│  └─ carousel.store.ts
+│
+├─ lib/
+│  ├─ ai/
+│  │  ├─ generateHook.ts
+│  │  ├─ generateCarousel.ts
+│  │  └─ prompt.ts
+│  │
+│  ├─ rules/
+│  │  └─ hookToTemplate.ts
+│  │
+│  └─ validators/
+│     ├─ hook.schema.ts
+│     └─ carousel.schema.ts
+│
+├─ types/
+│  └─ editor.ts
+│
+└─ styles/
+   └─ globals.css
+```
+
 [![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/colored.png)](#-état-du-projet)
 
 ## ➤ État du projet

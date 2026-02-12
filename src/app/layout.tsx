@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Lexend } from "next/font/google";
 import "./globals.css";
-// import { Toaster } from "@/components/ui/sonner"; 
+import { Toaster } from "@/components/ui/sonner"; 
 import { Suspense } from "react";
 // import { ThemeProvider } from "@/components/ThemeProvider";
 // import { ThemeWipeProvider } from "@/components/ThemeWipeProvider";
@@ -107,7 +107,7 @@ export default function RootLayout({
           <ThemeWipeProvider> */}
             <Suspense>
               {children}
-              {/* <Toaster richColors position="top-right" /> */}
+              <Toaster richColors position="top-right" />
             </Suspense>
           {/* </ThemeWipeProvider>
         </ThemeProvider> */}
