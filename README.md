@@ -4,9 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Built with Next.js](https://img.shields.io/badge/Built%20with-Next.js-black?logo=next.js)](https://nextjs.org/)
-[![Supabase](https://img.shields.io/badge/Powered%20by-Supabase-3FCF8E?logo=supabase)](https://supabase.com/)
 [![Deploy on Vercel](https://img.shields.io/badge/Deploy%20on-Vercel-black?logo=vercel)](https://vercel.com/)
-[![Stripe](https://img.shields.io/badge/Payments-Stripe-635BFF?logo=stripe)](https://stripe.com/)
 [![Status](https://img.shields.io/badge/Status-🚧%20In%20Development-yellow)](#-état-du-projet)
 
 ---
@@ -47,9 +45,8 @@ Simple. Rapide. Propre.
 - Génère le texte complet d’un carrousel à partir de :
   - un sujet
   - une audience
-  - un objectif
+  - un ton
   - une plateforme (LinkedIn / Instagram)
-- Ton contrôlé (pro, direct, inspirant)
 - Texte structuré **slide par slide**
 
 > L’IA écrit.  
@@ -91,23 +88,20 @@ Pas de décisions inutiles.
 ## ➤ Comment ça marche ?
 
 1. **Générer le contenu**
-   - Indique le sujet, l’audience et l’objectif
-   - L’IA génère le texte du carrousel
+   - Indique le sujet, l’audience, le ton, la plateforme et le format
+   - L’IA génère 3 hooks
 
-2. **Choisir un format**
-   - 1:1 ou 4:5
-   - LinkedIn, Instagram ou les deux
+2. **Choisir un hook**
+   - Sélectionne le hook d’accroche qui te plaît le plus
+   - L’IA génère le texte complet du carrousel
 
-3. **Appliquer un template**
-   - Le texte est injecté automatiquement
-   - Chaque slide est déjà structurée
-
-4. **Ajuster si nécessaire**
+3. **Ajuster si nécessaire**
    - Modifier le texte
-   - Remplacer les images
+   - Ajouter/Remplacer les images
+   - Modifier le thème de couleurs
 
-5. **Exporter**
-   - Images prêtes à être publiées
+4. **Exporter**
+   - Images/PDF prêtes à être publiées
 
 [![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/colored.png)](#-stack-technique)
 
@@ -119,8 +113,6 @@ FlowSlides est construit avec une stack moderne, fiable et scalable :
 - **TypeScript** — Typage strict et robustesse
 - **Tailwind CSS** — Styling rapide et maintenable
 - **shadcn/ui** — Composants UI accessibles et cohérents
-- **Supabase** — Authentification & base de données
-- **Stripe** — Paiements et abonnements
 - **Vercel** — Déploiement et performance
 
 [![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/colored.png)](#-architecture)
@@ -130,51 +122,21 @@ FlowSlides est construit avec une stack moderne, fiable et scalable :
 ```txt
 src/
 ├─ app/
+│  ├─ globals.css
 │  ├─ layout.tsx
-│  ├─ page.tsx                // landing simple
-│  ├─ editor/
-│  │  ├─ page.tsx             // orchestrateur
-│  │  └─ loading.tsx
-│  └─ api/
-│     ├─ hook/
-│     │  └─ route.ts
-│     └─ carousel/
-│        └─ route.ts
-│
+│  ├─ not-found.tsx
+│  └─ page.tsx
 ├─ components/
-│  ├─ editor/
-│  │  ├─ StepInputs.tsx
-│  │  ├─ StepHook.tsx
-│  │  ├─ StepTemplate.tsx
-│  │  ├─ StepCarousel.tsx
-│  │  └─ StepExport.tsx
-│  │
-│  ├─ ui/                     // shadcn (ne touche pas)
-│  └─ common/
-│     ├─ Button.tsx
-│     └─ Guard.tsx
-│
-├─ store/
-│  └─ carousel.store.ts
-│
+│  ├─ CarouselForm.tsx      // formulaire de génération
+│  ├─ HookSelection.tsx     // sélection du hook d’accroche
+│  ├─ SlideEditor.tsx       // éditeur de contenu pour chaque slide
+│  ├─ SlidePreview.tsx      // aperçu en temps réel
+│  ├─ StepIndicator.tsx     // indicateur de progression
+│  └─ ui/                   // shadcn/ui components
 ├─ lib/
-│  ├─ ai/
-│  │  ├─ generateHook.ts
-│  │  ├─ generateCarousel.ts
-│  │  └─ prompt.ts
-│  │
-│  ├─ rules/
-│  │  └─ hookToTemplate.ts
-│  │
-│  └─ validators/
-│     ├─ hook.schema.ts
-│     └─ carousel.schema.ts
-│
-├─ types/
-│  └─ editor.ts
-│
-└─ styles/
-   └─ globals.css
+│  └─ utils.ts
+└─ types/
+   └─ carousel.ts
 ```
 
 [![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/colored.png)](#-état-du-projet)
