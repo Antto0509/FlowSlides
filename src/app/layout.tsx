@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, Inter } from "next/font/google";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import ModeToggle from "@/components/ui/mode-toggle";
@@ -43,6 +44,7 @@ export default function RootLayout({
           {children}
           <Toaster position="top-right" richColors />
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
