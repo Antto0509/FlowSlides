@@ -17,6 +17,7 @@ import {
   Download,
   Palette,
 } from "lucide-react";
+import { ScrollableThumbnails } from "./ScrollableThumbnails";
 
 interface SlideEditorProps {
   slides: SlideContent[];
@@ -151,21 +152,15 @@ export default function SlideEditor({
 
       <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-8">
         {/* Thumbnails */}
-        <div className="hidden lg:flex flex-col gap-3 max-h-150 overflow-y-auto p-2 *:shrink-0 *:border *:border-muted rounded-xl">
-          {slides.map((slide, index) => (
-            <SlidePreview
-              key={slide.id}
-              slide={slide}
-              theme={theme}
-              format={format}
-              slideIndex={index}
-              totalSlides={slides.length}
-              authorName={authorName}
-              isActive={index === activeSlide}
-              isThumbnail
-              onClick={() => setActiveSlide(index)}
-            />
-          ))}
+        <div className="hidden lg:block">
+          <ScrollableThumbnails
+            slides={slides}
+            theme={theme}
+            format={format}
+            authorName={authorName}
+            activeSlide={activeSlide}
+            setActiveSlide={setActiveSlide}
+          />
         </div>
 
         {/* Main preview */}
