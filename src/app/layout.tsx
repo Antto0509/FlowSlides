@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, Inter } from "next/font/google";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import ModeToggle from "@/components/ui/mode-toggle";
 
 // h1, h2, h3, h4, h5, h6
 const spaceGrotesk = Space_Grotesk({
@@ -27,12 +30,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr">
-      <body
-        className={`${spaceGrotesk.variable} ${inter.variable} antialiased`}
-      >
-        {children}
-        <Toaster position="top-right" richColors />
+    <html lang="fr" suppressHydrationWarning>
+      <body className={`${spaceGrotesk.variable} ${inter.variable} antialiased`}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <div className="fixed top-4 right-4 z-50">
+            <ModeToggle/>
+          </div>
+          {children}
+          <Toaster position="top-right" richColors />
+        </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
