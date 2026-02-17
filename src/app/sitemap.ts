@@ -10,6 +10,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // Routes publiques
     const routes: Array<{ path: string; priority: number; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"] }> = [
         { path: "/", priority: 1.0, changeFrequency: "weekly" },
+        { path: "/create-carousel", priority: 0.8, changeFrequency: "monthly" },
     ];
 
     return routes.map((r) => ({

@@ -11,7 +11,7 @@ export default function robots(): MetadataRoute.Robots {
         rules: [
         {
             userAgent: "*",
-            allow: "/",
+            allow: ["/", "/create-carousel"],
             disallow: ["/api", "/_next", "/static"],
         },
         ],
