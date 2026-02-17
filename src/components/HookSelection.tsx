@@ -123,7 +123,7 @@ export default function HookSelection({
                 onClick={() => handleSelect(hook)}
                 className={cn(
                   "cursor-pointer transition-all duration-300 border-2 hover:shadow-lg hover:-translate-y-0.5",
-                  `bg-gradient-to-r ${colorClass}`,
+                  `bg-linear-to-r ${colorClass}`,
                   selectedId === hook.id &&
                     "ring-2 ring-primary scale-[1.02]",
                   "animate-in fade-in slide-in-from-bottom-2"
