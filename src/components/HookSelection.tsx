@@ -11,6 +11,8 @@ import {
   MessageCircleQuestion,
   BarChart3,
   Flame,
+  Zap,
+  BookOpen,
 } from "lucide-react";
 
 interface HookSelectionProps {
@@ -24,12 +26,16 @@ const STYLE_ICONS: Record<string, React.ReactNode> = {
   question: <MessageCircleQuestion className="w-5 h-5" />,
   statistic: <BarChart3 className="w-5 h-5" />,
   bold: <Flame className="w-5 h-5" />,
+  story: <BookOpen className="w-5 h-5" />,
+  controversial: <Zap className="w-5 h-5" />,
 };
 
 const STYLE_COLORS: Record<string, string> = {
   question: "from-blue-500/10 to-cyan-500/10 border-blue-500/20",
   statistic: "from-emerald-500/10 to-teal-500/10 border-emerald-500/20",
   bold: "from-rose-500/10 to-orange-500/10 border-rose-500/20",
+  story: "from-purple-500/10 to-pink-500/10 border-purple-500/20",
+  controversial: "from-yellow-500/10 to-amber-500/10 border-yellow-500/20",
 };
 
 export default function HookSelection({
@@ -103,7 +109,13 @@ export default function HookSelection({
                 ? "Question"
                 : hook.style === "statistic"
                 ? "Statistique choc"
-                : "Affirmation audacieuse";
+                : hook.style === "bold"
+                ? "Affirmation audacieuse"
+                : hook.style === "story"
+                ? "Histoire captivante"
+                : hook.style === "controversial"
+                ? "Controversé"
+                : "Autre";
 
             return (
               <Card

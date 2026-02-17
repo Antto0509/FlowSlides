@@ -13,7 +13,7 @@ import {
   DEFAULT_THEMES,
 } from "@/types/carousel";
 
-// Mock hooks for now (will be replaced by AI)
+// Mock hooks for fallback
 const generateMockHooks = (formData: CarouselFormData): Hook[] => [
   {
     id: "1",
@@ -74,6 +74,35 @@ const generateMockSlides = (
   return slides;
 };
 
+// Generate hooks using AI
+const generateHooks = async (formData: CarouselFormData): Promise<Hook[]> => {
+  try {
+    const response = await fetch('/api/hooks', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        subject: formData.subject,
+        audience: formData.audience,
+        tone: formData.tone,
+        goal: formData.goal,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to generate hooks');
+    }
+
+    const data = await response.json();
+    return data.hooks;
+  } catch (error) {
+    console.error('Error generating hooks with AI:', error);
+    // Fallback to mock hooks if API fails
+    return generateMockHooks(formData);
+  }
+};
+
 export default function Home() {
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState<CarouselFormData | null>(null);
@@ -82,16 +111,22 @@ export default function Home() {
   const [theme, setTheme] = useState<CarouselTheme>(DEFAULT_THEMES[0]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleFormSubmit = (data: CarouselFormData) => {
+  const handleFormSubmit = async (data: CarouselFormData) => {
     setFormData(data);
     setIsLoading(true);
 
-    // Simulate AI generation
-    setTimeout(() => {
-      setHooks(generateMockHooks(data));
-      setIsLoading(false);
+    try {
+      const generatedHooks = await generateHooks(data);
+      setHooks(generatedHooks);
       setStep(1);
-    }, 1500);
+    } catch (error) {
+      console.error('Error in form submission:', error);
+      // En cas d'erreur, on utilise quand même les hooks mock
+      setHooks(generateMockHooks(data));
+      setStep(1);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleHookSelect = (hook: Hook) => {
