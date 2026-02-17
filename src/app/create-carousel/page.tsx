@@ -12,14 +12,6 @@ import {
   CarouselTheme,
   DEFAULT_THEMES,
 } from "@/types/carousel";
-import { Metadata } from "next";
-
-const appName = process.env.APP_NAME || 'FlowSlides';
-
-export const metadata: Metadata = {
-  title: `${appName} - Créez des carrousels engageants en un clin d'œil`,
-  description: `${appName} est votre assistant de création de carrousels alimenté par l'IA. Générez des carrousels percutants pour LinkedIn et Instagram en quelques clics, adaptés à votre sujet et à votre audience.`
-};
 
 // Mock hooks for fallback
 const generateMockHooks = (formData: CarouselFormData): Hook[] => [
