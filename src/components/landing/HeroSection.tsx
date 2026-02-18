@@ -101,7 +101,7 @@ export function HeroSection() {
                 Créez des
               </GradientText>
             </span>
-            <span className="block text-foreground drop-shadow-sm mb-1">
+            <span className="block text-primary-foreground dark:text-foreground drop-shadow-sm mb-1">
               carrousels
             </span>
             <span className="block">
