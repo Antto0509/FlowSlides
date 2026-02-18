@@ -1,21 +1,25 @@
 'use client';
 
-import { 
-  Palette, 
-  Zap, 
-  Download, 
+import {
+  Palette,
+  Zap,
+  Download,
   Layers,
   TrendingUp,
   Layout,
-  LucideIcon
+  LucideIcon,
 } from 'lucide-react';
-import { Card } from '@/components/ui/card';
+import { motion, useInView, cubicBezier } from 'motion/react';
+import { useRef } from 'react';
+import GradientText from '@/components/ui/react-bits/GradientText';
+import SpotlightCard from '@/components/ui/react-bits/SpotlightCard';
 
 interface Feature {
   icon: LucideIcon;
   title: string;
   description: string;
-  color: string;
+  spotlightColor: `rgba(${number}, ${number}, ${number}, ${number})`;
+  wide?: boolean;
 }
 
 const features: Feature[] = [
@@ -23,72 +27,131 @@ const features: Feature[] = [
     icon: Palette,
     title: 'Design sur mesure',
     description: 'Personnalisez chaque élément : couleurs, typographie, layouts. Votre identité, votre style.',
-    color: 'from-primary to-accent'
+    spotlightColor: 'rgba(124, 58, 237, 0.2)',
   },
   {
     icon: Zap,
     title: 'Création express',
-    description: 'De l\'idée au carrousel finalisé en 120 secondes. Interface intuitive, résultats professionnels.',
-    color: 'from-accent to-primary'
+    description: "De l'idée au carrousel finalisé en 120 secondes. Interface intuitive, résultats professionnels.",
+    spotlightColor: 'rgba(236, 72, 153, 0.2)',
+    wide: true,
   },
   {
     icon: Download,
     title: 'Exports optimisés',
-    description: 'PDF haute définition, PNG sans perte, formats parfaits pour chaque plateforme sociale.',
-    color: 'from-primary/80 to-accent/80'
+    description: 'PDF haute définition, PNG sans perte. Formats parfaits pour chaque plateforme sociale.',
+    spotlightColor: 'rgba(124, 58, 237, 0.2)',
   },
   {
     icon: Layers,
     title: 'Templates pros',
     description: 'Bibliothèque de modèles conçus par des designers. Personnalisables à 100%.',
-    color: 'from-accent/90 to-primary/90'
+    spotlightColor: 'rgba(252, 211, 77, 0.15)',
+    wide: true,
   },
   {
     icon: TrendingUp,
     title: 'Performance garantie',
-    description: 'Designs optimisés pour l\'engagement. Augmentez votre reach naturellement.',
-    color: 'from-primary to-accent/70'
+    description: "Designs optimisés pour l'engagement. Augmentez votre reach naturellement.",
+    spotlightColor: 'rgba(236, 72, 153, 0.2)',
   },
   {
     icon: Layout,
     title: 'Multi-plateforme',
     description: 'LinkedIn, Instagram, ou les deux. Dimensions et formats adaptés automatiquement.',
-    color: 'from-accent to-primary/80'
-  }
+    spotlightColor: 'rgba(124, 58, 237, 0.2)',
+  },
 ];
 
+const containerVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.1, delayChildren: 0.05 } },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 32, filter: 'blur(4px)' },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: 'blur(0px)',
+    transition: { duration: 0.55, ease: cubicBezier(0.22, 1, 0.36, 1) },
+  },
+};
+
+const headingVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: cubicBezier(0.22, 1, 0.36, 1) } },
+};
+
 export function FeaturesSection() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const isInView = useInView(sectionRef, { once: true, margin: '-80px' });
+
   return (
-    <section className="relative px-6 py-16 md:py-20 bg-gradient-to-b from-muted/20 to-background">
+    <section
+      ref={sectionRef}
+      className="relative px-6 py-20 md:py-28 bg-linear-to-b from-muted/30 to-transparent"
+    >
+      {/* Top separator */}
+      <div className="absolute top-0 inset-x-0 h-px bg-linear-to-r from-transparent via-border to-transparent" />
+
       <div className="container mx-auto max-w-7xl">
-        <div className="text-center mb-16">
+        {/* Heading */}
+        <motion.div
+          className="text-center mb-16"
+          initial="hidden"
+          animate={isInView ? 'visible' : 'hidden'}
+          variants={headingVariants}
+        >
+          <p className="text-xs font-bold tracking-widest uppercase text-primary/80 mb-3">
+            Fonctionnalités
+          </p>
           <h2 className="text-4xl md:text-5xl font-black text-foreground mb-4 tracking-tight">
-            Tout pour <span className="gradient-text">réussir</span>
+            Tout pour{' '}
+            <GradientText colors={['#7C3AED', '#EC4899', '#FCD34D']} animationSpeed={7} showBorder={false}>
+              réussir
+            </GradientText>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Des fonctionnalités pensées pour les créateurs de contenu qui veulent se démarquer
+            Des fonctionnalités pensées pour les créateurs de contenu qui veulent se démarquer.
           </p>
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Grid */}
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
+          initial="hidden"
+          animate={isInView ? 'visible' : 'hidden'}
+          variants={containerVariants}
+        >
           {features.map((feature, i) => (
-            <Card 
+            <motion.div
               key={i}
-              className="group relative p-6 bg-card/50 backdrop-blur-sm border-border/50 hover:border-primary/20 hover:shadow-xl transition-all duration-500 hover:-translate-y-2 overflow-hidden"
+              variants={cardVariants}
+              className={feature.wide ? 'lg:col-span-1' : ''}
             >
-              {/* Gradient overlay on hover */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-5 transition-opacity duration-500`} />
-              
-              <div className="relative z-10">
-                <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-5 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-500`}>
-                  <feature.icon className="w-7 h-7 text-primary-foreground" />
-                </div>
-                <h3 className="text-xl font-bold text-foreground mb-3">{feature.title}</h3>
-                <p className="text-muted-foreground leading-relaxed text-sm">{feature.description}</p>
-              </div>
-            </Card>
+              <SpotlightCard
+                spotlightColor={feature.spotlightColor}
+                className="h-full !p-7 !bg-card/60 dark:!bg-card/80 !border-border/60 dark:!border-border/40 hover:!border-primary/30 dark:hover:!border-primary/40 hover:shadow-lg hover:shadow-primary/10 transition-shadow duration-300"
+              >
+                {/* Icon */}
+                <motion.div
+                  className="flex items-center justify-center size-13 rounded-xl bg-gradient-to-br from-primary to-accent shadow-lg shadow-primary/30 mb-5 shrink-0"
+                  whileHover={{ scale: 1.1, rotate: 4, transition: { duration: 0.22 } }}
+                >
+                  <feature.icon className="size-6 text-primary-foreground" />
+                </motion.div>
+
+                <h3 className="text-xl font-bold text-foreground mb-2 tracking-tight">
+                  {feature.title}
+                </h3>
+                <p className="text-muted-foreground leading-relaxed text-sm">
+                  {feature.description}
+                </p>
+              </SpotlightCard>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );
