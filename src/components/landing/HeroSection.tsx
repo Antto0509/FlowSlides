@@ -1,214 +1,260 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight, Zap, Share2, Linkedin, Instagram, Layers } from 'lucide-react';
+import { ArrowRight, Share2, Linkedin, Instagram, Layers, Sparkles } from 'lucide-react';
+import { motion } from 'motion/react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
-import Aurora from '@/components/ui/Aurora';
+import Aurora from '@/components/ui/react-bits/Aurora';
+import GradientText from '@/components/ui/react-bits/GradientText';
+import CountUp from '@/components/ui/react-bits/CountUp';
 import SlidePreview from '@/components/SlidePreview';
 
-interface HeroSectionProps {
-  mounted: boolean;
-}
+// Animation variants — toutes les valeurs de timing sont centralisées ici
+const variants = {
+  fadeUp: {
+    hidden: { opacity: 0, y: 24 },
+    visible: { opacity: 1, y: 0 },
+  },
+  fadeIn: {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1 },
+  },
+  scaleIn: {
+    hidden: { opacity: 0, scale: 0.95 },
+    visible: { opacity: 1, scale: 1 },
+  },
+};
 
-export function HeroSection({ mounted }: HeroSectionProps) {
+const stagger = {
+  container: {
+    visible: { transition: { staggerChildren: 0.12, delayChildren: 0.15 } },
+  },
+  cards: {
+    visible: { transition: { staggerChildren: 0.15, delayChildren: 0.5 } },
+  },
+};
+
+export function HeroSection() {
   const stats = [
-    { value: '10k+', label: 'Carrousels créés' },
-    { value: '2min', label: 'Temps moyen' },
-    { value: '98%', label: 'Satisfaction' }
+    { value: 10,  unit: 'k+', label: 'Carrousels créés' },
+    { value: 2,   unit: 'min', label: 'Temps moyen' },
+    { value: 98,  unit: '%',  label: 'Satisfaction' },
   ];
 
   const showcaseItems = [
-    { platform: 'LinkedIn', icon: Linkedin, gradient: 'from-primary to-primary/70' },
-    { platform: 'Instagram', icon: Instagram, gradient: 'from-accent to-accent/70' },
-    { platform: 'Multi', icon: Layers, gradient: 'from-primary/80 to-accent/80' }
+    { platform: 'LinkedIn',  icon: Linkedin,  index: 0 },
+    { platform: 'Instagram', icon: Instagram, index: 1 },
+    { platform: 'Multi',     icon: Layers,    index: 2 },
   ];
 
   return (
-    <section className="relative px-6 pt-28 pb-16 md:pt-32 md:pb-20 overflow-hidden">
-      {/* Aurora Background with overlay for better readability */}
+    <section className="relative px-6 pt-28 pb-24 md:pt-36 md:pb-32 overflow-hidden">
+      {/* ── Aurora + overlays ── */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <Aurora
-          colorStops={["#7cff67","#B19EEF","#5227FF"]}
-          blend={0.5}
-          amplitude={1.0}
-          speed={1}
+          colorStops={['#7C3AED', '#EC4899', '#FCD34D']}
+          blend={0.45}
+          amplitude={1.1}
+          speed={0.8}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/40 to-background/50 dark:from-background/70 dark:via-background/80 dark:to-background/85" />
+        <div className="absolute inset-0 bg-linear-to-b from-background/20 via-background/35 to-background/60 dark:from-background/60 dark:via-background/75 dark:to-background/90" />
+        <div className="absolute inset-0 hero-grid-overlay" />
+      </div>
+
+      {/* ── Floating orbs ── */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="hero-orb hero-orb--1" />
+        <div className="hero-orb hero-orb--2" />
+        <div className="hero-orb hero-orb--3" />
       </div>
 
       <div className="container mx-auto max-w-7xl relative z-10">
-        <div 
-          className={`text-center transition-all duration-1000 delay-150 ${
-            mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          }`}
+        {/* ── Text block ── */}
+        <motion.div
+          className="text-center"
+          initial="hidden"
+          animate="visible"
+          variants={stagger.container}
         >
-          <Badge 
-            className="mb-6 px-4 py-2 bg-primary/15 dark:bg-primary/20 text-primary dark:text-primary/90 border-primary/30 dark:border-primary/40 text-sm font-semibold hover:bg-primary/20 dark:hover:bg-primary/25 transition-colors shadow-sm"
+          {/* Badge */}
+          <motion.div variants={variants.fadeUp} className="inline-flex mb-8">
+            <Badge className="hero-badge px-4 py-2 text-sm font-semibold gap-2">
+              <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+              Nouveau : IA générative intégrée
+              <Sparkles className="w-3.5 h-3.5 animate-pulse [animation-delay:500ms]" />
+            </Badge>
+          </motion.div>
+
+          {/* Headline */}
+          <motion.h1
+            variants={variants.fadeUp}
+            className="text-5xl md:text-6xl lg:text-8xl font-black mb-6 leading-[0.95] tracking-tight"
           >
-            <Zap className="w-4 h-4 mr-2 inline animate-pulse" />
-            Nouveau : IA générative intégrée
-          </Badge>
-          
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-tight tracking-tight">
-            <span className="gradient-text drop-shadow-sm">Créez des</span>
-            <br />
-            <span className="text-foreground drop-shadow-sm">carrousels</span>
-            <br />
-            <span className="gradient-text drop-shadow-sm">inoubliables</span>
-          </h1>
-          
-          <p className="text-lg md:text-xl text-foreground/80 dark:text-foreground/90 mb-10 max-w-2xl mx-auto leading-relaxed font-medium">
-            La plateforme de création de carrousels pour{' '}
-            <span className="inline-flex items-center border border-primary/30 dark:border-primary/40 bg-primary/10 dark:bg-primary/15 px-2.5 py-1 rounded-lg text-primary dark:text-primary/95 font-semibold shadow-sm">
-              LinkedIn & Instagram
+            <span className="block mb-1">
+              <GradientText
+                colors={['#7C3AED', '#EC4899', '#FCD34D', '#7C3AED']}
+                animationSpeed={8}
+                showBorder={false}
+                className="drop-shadow-sm"
+              >
+                Créez des
+              </GradientText>
             </span>
-            <br className="hidden md:block" />
-            Design professionnel, exports parfaits, résultats garantis.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-            <Link href="/create-carousel">
-              <Button 
-                size="lg"
-                className="group relative overflow-hidden bg-gradient-to-br from-primary to-accent hover:opacity-90 text-primary-foreground px-8 py-6 text-base font-bold rounded-xl shadow-lg hover:shadow-xl hover:shadow-primary/30 dark:hover:shadow-primary/20 transition-all duration-300 hover:scale-105"
+            <span className="block text-foreground drop-shadow-sm mb-1">
+              carrousels
+            </span>
+            <span className="block">
+              <GradientText
+                colors={['#FCD34D', '#EC4899', '#7C3AED', '#FCD34D']}
+                animationSpeed={8}
+                showBorder={false}
+                className="drop-shadow-sm"
               >
-                <span className="relative z-10 flex items-center">
-                  Créer gratuitement
-                  <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </span>
-                <div className="absolute inset-0 bg-gradient-to-br from-accent to-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              </Button>
-            </Link>
-            
-            <Button 
-              size="lg"
-              variant="outline"
-              className="border-2 border-border hover:bg-primary/5 dark:hover:bg-primary/10 text-foreground hover:text-primary hover:border-primary/40 dark:hover:border-primary/50 px-8 py-6 text-base font-semibold rounded-xl transition-all duration-300 shadow-sm"
+                inoubliables
+              </GradientText>
+            </span>
+          </motion.h1>
+
+          {/* Subline */}
+          <motion.p
+            variants={variants.fadeUp}
+            className="text-lg md:text-xl text-foreground/75 dark:text-foreground/85 mb-10 max-w-xl mx-auto leading-relaxed font-medium"
+          >
+            La plateforme de création de carrousels pour{' '}
+            <GradientText
+              colors={['#7C3AED', '#EC4899', '#FCD34D']}
+              animationSpeed={6}
+              showBorder={true}
             >
-              <Share2 className="mr-2 w-5 h-5" />
-              Voir des exemples
-            </Button>
-          </div>
+              LinkedIn & Instagram
+            </GradientText>
+            {' '}design professionnel, exports parfaits
+          </motion.p>
 
-          {/* Stats bar */}
-          <div className="flex flex-wrap justify-center gap-12 md:gap-16">
+          {/* CTAs */}
+          <motion.div
+            variants={variants.fadeUp}
+            className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16"
+          >
+            <Link href="/create-carousel">
+              <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.98 }}>
+                <Button size="lg" className="hero-cta-primary group px-8 py-6 text-base font-bold rounded-2xl">
+                  Créer gratuitement
+                  <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
+                </Button>
+              </motion.div>
+            </Link>
+
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button size="lg" className="hero-cta-secondary px-8 py-6 text-base font-semibold rounded-2xl">
+                <Share2 className="mr-2 w-5 h-5" />
+                Voir des exemples
+              </Button>
+            </motion.div>
+          </motion.div>
+
+          {/* Stats */}
+          <motion.div
+            variants={stagger.container}
+            className="flex flex-wrap justify-center gap-2 md:gap-3"
+          >
             {stats.map((stat, i) => (
-              <div 
-                key={i} 
-                className={`transition-all duration-700 ${
-                  mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-                }`}
-                style={{ transitionDelay: `${(i + 3) * 100}ms` }}
-              >
-                <div className="text-3xl md:text-4xl font-black gradient-text mb-1 drop-shadow-sm">
-                  {stat.value}
-                </div>
-                <div className="text-sm text-foreground/70 dark:text-foreground/80 font-medium">
-                  {stat.label}
-                </div>
-              </div>
+              <motion.div key={i} variants={variants.fadeUp} className="hero-stat-pill">
+                <span className="hero-stat-value">
+                  <GradientText colors={['#7C3AED', '#EC4899', '#FCD34D']} animationSpeed={5}>
+                    <CountUp from={0} to={stat.value} separator="," direction="up" duration={1} className="" />
+                    {stat.unit}
+                  </GradientText>
+                </span>
+                <span className="hero-stat-label">{stat.label}</span>
+              </motion.div>
             ))}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
-        {/* Real carousel examples showcase */}
-        <div 
-          className={`mt-20 relative transition-all duration-1000 delay-500 ${
-            mounted ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-          }`}
+        {/* ── Showcase ── */}
+        <motion.div
+          className="mt-24"
+          initial="hidden"
+          animate="visible"
+          variants={variants.fadeUp}
+          transition={{ delay: 0.4, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         >
-          {/* Section header */}
-          <div className="text-center mb-12">
+          <div className="text-center mb-14">
+            <p className="hero-eyebrow">Exemples générés par la plateforme</p>
             <h2 className="text-3xl md:text-4xl font-black text-foreground mb-3">
-              Des carrousels qui <span className="gradient-text">captivent</span>
+              Des carrousels qui{' '}
+              <GradientText colors={['#7C3AED', '#EC4899', '#FCD34D']} animationSpeed={7} showBorder={false}>
+                captivent
+              </GradientText>
             </h2>
-            <p className="text-base md:text-lg text-foreground/70 dark:text-foreground/80 max-w-2xl mx-auto">
-              Créez des slides professionnels adaptés à chaque plateforme. Voici des exemples de ce que vous pourrez générer en quelques clics.
+            <p className="text-base md:text-lg text-foreground/65 dark:text-foreground/75 max-w-xl mx-auto">
+              Créez des slides professionnels adaptés à chaque plateforme en quelques clics.
             </p>
           </div>
 
-          <div className="relative max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="relative max-w-5xl mx-auto">
+            <div className="hero-cards-glow" />
+
+            <motion.div
+              className="relative grid grid-cols-1 md:grid-cols-3 gap-6"
+              initial="hidden"
+              animate="visible"
+              variants={stagger.cards}
+            >
               {showcaseItems.map((item, i) => (
-                <div 
+                <motion.div
                   key={i}
-                  className="relative group"
-                  style={{ 
-                    animationDelay: `${i * 150}ms`,
-                    animation: mounted ? 'fadeInUp 0.6s ease-out forwards' : 'none',
-                    opacity: mounted ? 1 : 0
-                  }}
+                  variants={variants.fadeUp}
+                  whileHover={{ y: -6, transition: { duration: 0.25, ease: 'easeOut' } }}
+                  className="hero-showcase-card"
                 >
-                  <div className="relative">
-                    {/* Platform badge */}
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
-                      <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full bg-card/90 dark:bg-card/70 backdrop-blur-md border border-border/60 dark:border-border/40 shadow-lg`}>
-                        <item.icon className="w-4 h-4 text-primary" />
-                        <span className="text-xs font-semibold text-foreground">{item.platform}</span>
-                      </div>
+                  {/* Platform badge */}
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
+                    <div className="hero-platform-badge flex items-center gap-1.5 px-3 py-1.5 rounded-full">
+                      <item.icon className="w-3.5 h-3.5 text-primary" />
+                      <span className="text-xs font-bold text-foreground">{item.platform}</span>
                     </div>
-                    
-                    {/* Slide preview */}
-                    <SlidePreview
-                      slide={{
-                        id: `showcase-${i}`,
-                        type: i === 0 ? 'hook' : i === 1 ? 'content' : 'cta',
-                        title: i === 0 
-                          ? '5 erreurs qui tuent votre engagement LinkedIn' 
-                          : i === 1 
-                          ? 'Erreur #1 : Négliger les visuels'
-                          : 'Prêt à booster votre reach ?',
-                        body: i === 0 
-                          ? `Et comment les éviter en ${new Date().getFullYear()}`
-                          : i === 1
-                          ? 'Les posts avec images génèrent 2x plus d\'engagement'
-                          : 'Créez des carrousels qui performent dès aujourd\'hui',
-                        bulletPoints: i === 1 ? [
-                          'Utilisez des couleurs contrastées',
-                          'Ajoutez des graphiques simples',
-                          'Gardez une identité visuelle'
-                        ] : undefined
-                      }}
-                      theme={{
-                        id: `theme-${i}`,
-                        name: `Showcase Theme ${i + 1}`,
-                        bgColor: i === 0 ? '#FFFFFF' : i === 1 ? '#0F172A' : '#7C3AED',
-                        textColor: i === 0 ? '#0F172A' : i === 1 ? '#FFFFFF' : '#FFFFFF',
-                        accentColor: i === 0 ? '#7C3AED' : i === 1 ? '#EC4899' : '#FCD34D',
-                        fontFamily: 'var(--font-space-grotesk), sans-serif'
-                      }}
-                      format={i === 0 ? '1:1' : i === 1 ? '4:5' : '1:1'}
-                      slideIndex={i === 0 ? 0 : i === 1 ? 1 : 9}
-                      totalSlides={10}
-                      authorName={i === 0 ? '@votrenom' : undefined}
-                      isThumbnail={false}
-                    />
                   </div>
-                </div>
+
+                  <SlidePreview
+                    slide={{
+                      id: `showcase-${i}`,
+                      type: i === 0 ? 'hook' : i === 1 ? 'content' : 'cta',
+                      title:
+                        i === 0 ? '5 erreurs qui tuent votre engagement LinkedIn'
+                        : i === 1 ? 'Erreur #1 : Négliger les visuels'
+                        : 'Prêt à booster votre reach ?',
+                      body:
+                        i === 0 ? `Et comment les éviter en ${new Date().getFullYear()}`
+                        : i === 1 ? "Les posts avec images génèrent 2x plus d'engagement"
+                        : "Créez des carrousels qui performent dès aujourd'hui",
+                      bulletPoints:
+                        i === 1
+                          ? ['Utilisez des couleurs contrastées', 'Ajoutez des graphiques simples', 'Gardez une identité visuelle']
+                          : undefined,
+                    }}
+                    theme={{
+                      id: `theme-${i}`,
+                      name: `Showcase Theme ${i + 1}`,
+                      bgColor:     i === 0 ? '#FFFFFF' : i === 1 ? '#0F172A' : '#7C3AED',
+                      textColor:   i === 0 ? '#0F172A' : '#FFFFFF',
+                      accentColor: i === 0 ? '#7C3AED' : i === 1 ? '#EC4899' : '#FCD34D',
+                      fontFamily: 'var(--font-space-grotesk), sans-serif',
+                    }}
+                    format={i === 1 ? '4:5' : '1:1'}
+                    slideIndex={i === 0 ? 0 : i === 1 ? 1 : 9}
+                    totalSlides={10}
+                    authorName={i === 0 ? '@votrenom' : undefined}
+                    isThumbnail={false}
+                  />
+                </motion.div>
               ))}
-            </div>
-
-            {/* Floating elements - more subtle in dark mode */}
-            <div className="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-accent/20 to-primary/20 dark:from-accent/10 dark:to-primary/10 rounded-full blur-xl animate-pulse" />
-            <div className="absolute -bottom-4 -left-4 w-28 h-28 bg-gradient-to-br from-primary/20 to-accent/20 dark:from-primary/10 dark:to-accent/10 rounded-full blur-xl animate-pulse" style={{ animationDelay: '1s' }} />
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
       </div>
-
-      <style jsx>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
     </section>
   );
 }
