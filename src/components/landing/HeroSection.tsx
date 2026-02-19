@@ -146,12 +146,14 @@ export function HeroSection() {
               </motion.div>
             </Link>
 
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Button size="lg" className="hero-cta-secondary px-8 py-6 text-base font-semibold rounded-2xl">
-                <Share2 className="mr-2 w-5 h-5" />
-                Voir des exemples
-              </Button>
-            </motion.div>
+            <Link href="/examples">
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Button size="lg" className="hero-cta-secondary px-8 py-6 text-base font-semibold rounded-2xl">
+                  <Share2 className="mr-2 w-5 h-5" />
+                  Voir des exemples
+                </Button>
+              </motion.div>
+            </Link>
           </motion.div>
 
           {/* Stats */}
