@@ -55,8 +55,8 @@ export function Navigation({ appName = 'CarouselGen', mounted }: NavigationProps
               {/* Brand */}
               <Link href="/" className="flex items-center gap-2.5 group">
                 <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary to-accent rounded-xl blur-md opacity-0 group-hover:opacity-70 transition-opacity duration-300" />
-                  <div className="relative w-9 h-9 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center shadow-md group-hover:scale-105 transition-transform duration-300">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary to-accent rounded-4xl blur-md opacity-0 group-hover:opacity-70 transition-opacity duration-300" />
+                  <div className="relative w-9 h-9 bg-gradient-to-br from-primary to-accent rounded-4xl flex items-center justify-center shadow-md group-hover:scale-105 transition-transform duration-300">
                     <Sparkles className="w-4 h-4 text-primary-foreground" />
                   </div>
                 </div>
