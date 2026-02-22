@@ -4,7 +4,6 @@ import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import ModeToggle from "@/components/ui/mode-toggle";
 
 // h1, h2, h3, h4, h5, h6
 const spaceGrotesk = Space_Grotesk({
@@ -18,10 +17,11 @@ const inter = Inter({
   subsets: ["latin"]
 });
 
+const appName = process.env.APP_NAME || 'FlowSlides';
+
 export const metadata: Metadata = {
-  title: "FlowSlides - Créez des carrousels engageants en un clin d'œil",
-  description:
-    "FlowSlides est votre assistant de création de carrousels alimenté par l'IA. Générez des carrousels percutants pour LinkedIn et Instagram en quelques clics, adaptés à votre sujet et à votre audience.",
+  title: `${appName} - Créez des carrousels engageants en un clin d'œil`,
+  description: `${appName} est votre assistant de création de carrousels alimenté par l'IA. Générez des carrousels percutants pour LinkedIn et Instagram en quelques clics, adaptés à votre sujet et à votre audience.`
 };
 
 export default function RootLayout({
@@ -38,9 +38,6 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className="fixed top-4 right-4 z-50">
-            <ModeToggle/>
-          </div>
           {children}
           <Toaster position="top-right" richColors />
         </ThemeProvider>

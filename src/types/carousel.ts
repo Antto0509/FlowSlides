@@ -1,3 +1,5 @@
+import { Flame, LucideIcon,  Lightbulb, Smile, Target, TrendingUp, Users, GraduationCap, Sparkles, Briefcase } from "lucide-react";
+
 export type Tone = "professional" | "inspiring" | "educational" | "humorous" | "provocative";
 export type SocialNetwork = "linkedin" | "instagram";
 export type SlideFormat = "4:5" | "1:1";
@@ -6,6 +8,7 @@ export interface CarouselFormData {
   subject: string;
   audience: string;
   tone: Tone;
+  goal: string;
   networks: SocialNetwork[];
   format: SlideFormat;
   slideCount: number;
@@ -44,12 +47,19 @@ export interface CarouselData {
   authorAvatar: string | null;
 }
 
-export const TONES: { value: Tone; label: string; emoji: string }[] = [
-  { value: "professional", label: "Professionnel", emoji: "💼" },
-  { value: "inspiring", label: "Inspirant", emoji: "✨" },
-  { value: "educational", label: "Éducatif", emoji: "📚" },
-  { value: "humorous", label: "Humoristique", emoji: "😄" },
-  { value: "provocative", label: "Provocateur", emoji: "🔥" },
+export const TONES: { value: Tone; label: string; icon: LucideIcon }[] = [
+  { value: "professional", label: "Professionnel", icon: Briefcase },
+  { value: "inspiring", label: "Inspirant", icon: Sparkles },
+  { value: "educational", label: "Éducatif", icon: GraduationCap },
+  { value: "humorous", label: "Humoristique", icon: Smile },
+  { value: "provocative", label: "Provocateur", icon: Flame },
+];
+
+export const GOALS: { value: string; label: string; icon: LucideIcon }[] = [
+  { value: "inform", label: "Informer", icon: Lightbulb },
+  { value: "engage", label: "Engager", icon: Target },
+  { value: "convert", label: "Convertir", icon: TrendingUp },
+  { value: "inspire", label: "Inspirer", icon: Users },
 ];
 
 export const DEFAULT_THEMES: CarouselTheme[] = [
