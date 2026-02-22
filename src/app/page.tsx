@@ -1,12 +1,12 @@
 import {
-  Navigation,
   HeroSection,
   FeaturesSection,
   TestimonialsSection,
   CTASection,
-  Footer,
   AnimatedBackground
 } from '@/components/landing';
+import { Navigation } from '@/components/Navigation';
+import { Footer } from '@/components/Footer';
 
 const appName = process.env.APP_NAME || 'FlowSlides';
 

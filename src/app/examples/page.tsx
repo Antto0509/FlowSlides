@@ -5,11 +5,11 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { ExampleCard } from "@/components/examples/ExampleCard";
-import { Navigation } from "@/components/landing/Navigation";
-import { NetworkFilter } from "@/types/example";
-import { EXAMPLES } from "@/lib/examples";
+import { Navigation } from "@/components/Navigation";
+import { NetworkFilter, EXAMPLES } from "@/types/example";
 import { Sparkles, Linkedin, Instagram, ArrowRight, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Footer } from "@/components/Footer";
 
 export default function ExamplesPage() {
   const [filter, setFilter] = useState<NetworkFilter>("all");
@@ -223,6 +223,8 @@ export default function ExamplesPage() {
           </motion.div>
         </div>
       </section>
+
+      <Footer appName="FlowSlides" />
     </main>
   );
 }
