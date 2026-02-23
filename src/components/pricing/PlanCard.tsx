@@ -207,7 +207,7 @@ export function PlanCard({
           <motion.div
             whileHover={{ rotate: [0, -10, 10, -6, 6, 0], transition: { duration: 0.5 } }}
             className={cn(
-              "w-9 h-9 rounded-xl flex items-center justify-center",
+              "w-9 h-9 rounded-4xl flex items-center justify-center",
               plan.highlighted || isCurrentPlan
                 ? "gradient-primary text-primary-foreground"
                 : "bg-secondary text-foreground"
