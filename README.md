@@ -120,23 +120,55 @@ FlowSlides est construit avec une stack moderne, fiable et scalable :
 ## ➤ Architecture
 
 ```txt
-src/
-├─ app/
-│  ├─ globals.css
-│  ├─ layout.tsx
-│  ├─ not-found.tsx
-│  └─ page.tsx
-├─ components/
-│  ├─ CarouselForm.tsx      // formulaire de génération
-│  ├─ HookSelection.tsx     // sélection du hook d’accroche
-│  ├─ SlideEditor.tsx       // éditeur de contenu pour chaque slide
-│  ├─ SlidePreview.tsx      // aperçu en temps réel
-│  ├─ StepIndicator.tsx     // indicateur de progression
-│  └─ ui/                   // shadcn/ui components
-├─ lib/
-│  └─ utils.ts
-└─ types/
-   └─ carousel.ts
+FlowSlides/
+├─ public/
+├─ src/
+│  ├─ app/
+│  │  ├─ api/                 // endpoints pour la génération de contenu
+│  │  ├─ create-carousel/     // interface de création de carrousel
+│  │  ├─ examples/            // exemples de carrousels générés
+│  │  ├─ legal/               // mentions légales
+│  │  ├─ pricing/             // page de tarification
+│  │  ├─ privacy/             // politique de confidentialité
+│  │  ├─ terms/               // CGU (Conditions Générales d’Utilisation)
+│  │  ├─ favicon.ico
+│  │  ├─ globals.css
+│  │  ├─ layout.tsx
+│  │  ├─ not-found.tsx
+│  │  ├─ page.tsx
+│  │  ├─ robots.ts
+│  │  └─ sitemap.ts
+│  ├─ components/
+│  │  ├─ examples/            // composants spécifiques aux exemples de carrousels
+│  │  ├─ landing/             // composants spécifiques à la landing page
+│  │  ├─ legal/               // composants pour les pages légales
+│  │  ├─ pricing/             // composants pour la page de tarification
+│  │  ├─ ui/                  //shadcn/ui components
+│  │  ├─ CarouselForm.tsx     // formulaire de génération
+│  │  ├─ Footer.tsx           // pied de page
+│  │  ├─ HookSelection.tsx    // sélection du hook d’accroche
+│  │  ├─ Navigation.tsx       // barre de navigation
+│  │  ├─ ScrollableThumbnails.tsx   // aperçu des slides sous forme de miniatures
+│  │  ├─ SlideEditor.tsx      // éditeur de contenu pour chaque slide
+│  │  ├─ SlidePreview.tsx     // aperçu en temps réel
+│  │  ├─ StepIndicator.tsx    // indicateur de progression
+│  │  └─ ThemeProvider.tsx    // gestion des thèmes de couleurs
+│  ├─ lib/
+│  │  └─ utils.ts
+│  └─ types/
+│     ├─ carousel.ts
+│     ├─ example.ts
+│     └─ pricing.ts
+├─ .gitignore
+├─ components.json
+├─ eslint.config.mjs
+├─ next-env.d.ts
+├─ next.config.ts
+├─ package-lock.json
+├─ package.json
+├─ postcss.config.mjs
+├─ README.md
+└─ tsconfig.json
 ```
 
 [![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/colored.png)](#-état-du-projet)
