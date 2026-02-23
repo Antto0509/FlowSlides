@@ -1,24 +1,148 @@
 "use client";
 
-import { ArrowRight, Check, X } from "lucide-react";
+import { ArrowRight, Check, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Plan } from "@/types/pricing";
+import { Plan, Subscription } from "@/types/pricing";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { useState } from "react";
 
 export function PlanCard({
   plan,
   annual,
   animationDelay,
+  subscription,
 }: {
   plan: Plan;
   annual: boolean;
   animationDelay: number;
+  subscription: Subscription;
 }) {
   const price = annual ? plan.annualPrice : plan.monthlyPrice;
   const isFree = plan.monthlyPrice === 0;
+  const [loading, setLoading] = useState(false);
+
+  const isActive = subscription?.status === "active";
+  const isCurrentPlan = isActive && subscription?.plan.startsWith(plan.id)
+  const isOtherPaidPlan = isActive && !subscription?.plan.startsWith(plan.id) && !isFree
+
+  const handleSubscribe = async () => {
+    const priceId = annual ? plan.stripePriceAnnual : plan.stripePriceMonthly;
+    if (!priceId) return;
+
+    setLoading(true);
+    try {
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ priceId }),
+      });
+      const { url, error } = await res.json();
+      if (error) throw new Error(error);
+      window.location.href = url;
+    } catch (err) {
+      console.error("Erreur lors du checkout :", err);
+      setLoading(false);
+    }
+  };
+
+  const handleManage = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/stripe/portal", { method: "POST" });
+      const { url, error } = await res.json();
+      if (error) throw new Error(error);
+      window.location.href = url;
+    } catch (err) {
+      console.error("Erreur portail :", err);
+      setLoading(false);
+    }
+  };
+
+  const renderCTA = () => {
+    // Plan gratuit
+    if (isFree) {
+      return (
+        <Link href="/create-carousel" className="block">
+          <Button
+            size="lg"
+            className="w-full h-12 font-semibold gap-2 transition-all hero-cta-secondary"
+          >
+            {plan.cta}
+            <ArrowRight className="w-4 h-4" />
+          </Button>
+        </Link>
+      );
+    }
+
+    // Plan actuellement souscrit
+    if (isCurrentPlan) {
+      return (
+        <Button
+          size="lg"
+          variant="outline"
+          className="w-full h-12 font-semibold gap-2 cursor-default opacity-70"
+          disabled
+        >
+          ✓ Plan actuel
+        </Button>
+      );
+    }
+
+    // Changer de plan (abonnement actif sur un autre plan)
+    if (isOtherPaidPlan) {
+      return (
+        <Button
+          size="lg"
+          onClick={handleManage}
+          disabled={loading}
+          className={cn(
+            "w-full h-12 font-semibold gap-2 transition-all",
+            plan.ctaVariant === "gradient" &&
+              "gradient-primary border-0 shadow-lg shadow-primary/25 hover:opacity-90",
+            plan.ctaVariant === "secondary" &&
+              "border-secondary hover:bg-secondary/50 hover:text-foreground"
+          )}
+        >
+          {loading ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <>
+              Changer de plan
+              <ArrowRight className="w-4 h-4" />
+            </>
+          )}
+        </Button>
+      );
+    }
+
+    // Pas d'abonnement — achat normal
+    return (
+      <Button
+        size="lg"
+        onClick={handleSubscribe}
+        disabled={loading}
+        className={cn(
+          "w-full h-12 font-semibold gap-2 transition-all",
+          plan.ctaVariant === "gradient" &&
+            "gradient-primary border-0 shadow-lg shadow-primary/25 hover:opacity-90",
+          plan.ctaVariant === "secondary" &&
+            "border-secondary hover:bg-secondary/50 hover:text-foreground"
+        )}
+      >
+        {loading ? (
+          <Loader2 className="w-4 h-4 animate-spin" />
+        ) : (
+          <>
+            {plan.cta}
+            <ArrowRight className="w-4 h-4" />
+          </>
+        )}
+      </Button>
+    );
+  };
 
   return (
     <motion.div
@@ -34,11 +158,12 @@ export function PlanCard({
         "relative rounded-2xl border flex flex-col gap-6 h-full p-8",
         plan.highlighted
           ? "border-primary/40 bg-card shadow-2xl shadow-primary/10"
-          : "border-border/60 bg-card hover:border-primary/20 hover:shadow-lg"
+          : "border-border/60 bg-card hover:border-primary/20 hover:shadow-lg",
+        isCurrentPlan && "border-primary/60 ring-2 ring-primary/20"
       )}
     >
       {/* Popular badge */}
-      {plan.badge && (
+      {plan.badge && !isCurrentPlan && (
         <motion.div
           initial={{ opacity: 0, scale: 0.7, y: -4 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -51,8 +176,22 @@ export function PlanCard({
         </motion.div>
       )}
 
+      {/* Badge "Votre plan" si abonnement actif sur ce plan */}
+      {isCurrentPlan && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.7, y: -4 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ delay: animationDelay / 1000 + 0.25, duration: 0.35, ease: "backOut" }}
+          className="absolute z-10 -top-3.5 left-1/2 -translate-x-1/2"
+        >
+          <Badge className="bg-primary text-primary-foreground border-0 px-4 py-1 text-xs font-semibold shadow-md whitespace-nowrap">
+            ✓ Votre plan
+          </Badge>
+        </motion.div>
+      )}
+
       {/* Top accent line */}
-      {plan.highlighted && (
+      {(plan.highlighted || isCurrentPlan) && (
         <motion.div
           initial={{ scaleX: 0 }}
           animate={{ scaleX: 1 }}
@@ -69,7 +208,7 @@ export function PlanCard({
             whileHover={{ rotate: [0, -10, 10, -6, 6, 0], transition: { duration: 0.5 } }}
             className={cn(
               "w-9 h-9 rounded-xl flex items-center justify-center",
-              plan.highlighted
+              plan.highlighted || isCurrentPlan
                 ? "gradient-primary text-primary-foreground"
                 : "bg-secondary text-foreground"
             )}
@@ -78,9 +217,7 @@ export function PlanCard({
           </motion.div>
           <span className="font-bold text-lg">{plan.name}</span>
         </div>
-        <p className="text-muted-foreground text-sm leading-relaxed">
-          {plan.description}
-        </p>
+        <p className="text-muted-foreground text-sm leading-relaxed">{plan.description}</p>
       </div>
 
       {/* Price */}
@@ -128,9 +265,7 @@ export function PlanCard({
           {!annual && !isFree && (
             <p className="text-xs text-muted-foreground">
               Soit{" "}
-              <span className="font-semibold text-primary">
-                {plan.annualPrice}€/mois
-              </span>{" "}
+              <span className="font-semibold text-primary">{plan.annualPrice}€/mois</span>{" "}
               en annuel (-20 %)
             </p>
           )}
@@ -138,24 +273,9 @@ export function PlanCard({
       </div>
 
       {/* CTA */}
-      <Link href="/create-carousel" className="block">
-        <motion.div whileTap={{ scale: 0.97 }} whileHover={{ scale: 1.02 }}>
-          <Button
-            size="lg"
-            className={cn(
-              "w-full h-12 font-semibold gap-2 transition-all",
-              plan.ctaVariant === "gradient" &&
-                "gradient-primary border-0 shadow-lg shadow-primary/25 hover:opacity-90",
-              plan.ctaVariant === "outline" && "hero-cta-secondary",
-              plan.ctaVariant === "secondary" &&
-                "border-secondary hover:bg-secondary/50 hover:text-foreground"
-            )}
-          >
-            {plan.cta}
-            <ArrowRight className="w-4 h-4" />
-          </Button>
-        </motion.div>
-      </Link>
+      <motion.div whileTap={{ scale: isCurrentPlan ? 1 : 0.97 }} whileHover={{ scale: isCurrentPlan ? 1 : 1.02 }}>
+        {renderCTA()}
+      </motion.div>
 
       <div className="border-t border-border/60" />
 
