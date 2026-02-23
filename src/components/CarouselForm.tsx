@@ -14,13 +14,14 @@ import {
   SocialNetwork,
   SlideFormat,
   TONES,
+  GOALS,
 } from "@/types/carousel";
 import {
   Zap,
   Linkedin,
   Instagram,
   Square,
-  RectangleVertical,
+  RectangleVertical
 } from "lucide-react";
 
 interface CarouselFormProps {
@@ -35,6 +36,7 @@ export default function CarouselForm({
   const [subject, setSubject] = useState("");
   const [audience, setAudience] = useState("");
   const [tone, setTone] = useState<Tone>("professional");
+  const [goal, setGoal] = useState("inform");
   const [networks, setNetworks] = useState<SocialNetwork[]>(["linkedin"]);
   const [format, setFormat] = useState<SlideFormat>("4:5");
   const [slideCount, setSlideCount] = useState([8]);
@@ -56,6 +58,7 @@ export default function CarouselForm({
       subject: subject.trim(),
       audience: audience.trim(),
       tone,
+      goal,
       networks,
       format,
       slideCount: slideCount[0],
@@ -104,25 +107,52 @@ export default function CarouselForm({
             />
           </div>
 
+          {/* Goal */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold">Objectif</Label>
+            <div className="grid grid-cols-2 gap-3">
+              {GOALS.map(({ value, label, icon: Icon }) => (
+                <button
+                  type="button"
+                  key={value}
+                  onClick={() => setGoal(value)}
+                  className={cn(
+                    "flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all duration-200 font-medium",
+                    goal === value
+                      ? "border-primary bg-primary/5 text-primary"
+                      : "border-border hover:border-primary/30 text-muted-foreground"
+                  )}
+                >
+                  <Icon className="w-5 h-5" />
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Tone */}
           <div className="space-y-3">
             <Label className="text-base font-semibold">Ton</Label>
             <div className="flex flex-wrap gap-2">
-              {TONES.map((t) => (
-                <button
-                  type="button"
-                  key={t.value}
-                  onClick={() => setTone(t.value)}
-                  className={cn(
-                    "px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border",
-                    tone === t.value
-                      ? "gradient-primary text-primary-foreground border-transparent shadow-md shadow-primary/20"
-                      : "bg-secondary text-secondary-foreground border-border hover:border-primary/40"
-                  )}
-                >
-                  {t.emoji} {t.label}
-                </button>
-              ))}
+              {TONES.map((t) => {
+                const Icon = t.icon;
+                return (
+                  <button
+                    type="button"
+                    key={t.value}
+                    onClick={() => setTone(t.value)}
+                    className={cn(
+                      "px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border flex items-center gap-2",
+                      tone === t.value
+                        ? "gradient-primary text-primary-foreground border-transparent shadow-md shadow-primary/20"
+                        : "bg-secondary text-secondary-foreground border-border hover:border-primary/40"
+                    )}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {t.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
