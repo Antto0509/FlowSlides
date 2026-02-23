@@ -11,6 +11,9 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.74.0",
     "@radix-ui/react-slot": "^1.2.4",
+    "@stripe/stripe-js": "^8.8.0",
+    "@supabase/ssr": "^0.8.0",
+    "@supabase/supabase-js": "^2.97.0",
     "@vercel/analytics": "^1.6.1",
     "baseline-browser-mapping": "^2.9.19",
     "caniuse-lite": "^1.0.30001769",
@@ -27,6 +30,7 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "sonner": "^2.0.7",
+    "stripe": "^20.3.1",
     "tailwind-animate": "^0.2.10",
     "tailwind-merge": "^3.4.0",
     "zod": "^3.23.8"
