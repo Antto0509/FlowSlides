@@ -17,7 +17,7 @@ const inter = Inter({
   subsets: ["latin"]
 });
 
-const appName = process.env.APP_NAME || 'FlowSlides';
+const appName = process.env.NEXT_PUBLIC_APP_NAME || 'FlowSlides';
 
 export const metadata: Metadata = {
   title: `${appName} - Créez des carrousels engageants en un clin d'œil`,

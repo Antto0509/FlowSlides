@@ -1,6 +1,12 @@
 import { createElement } from "react";
 import { Crown, Sparkles, Zap } from "lucide-react";
 
+export type Subscription = {
+  plan: string;
+  status: string;
+  stripe_customer_id: string | null;
+} | null;
+
 export interface PlanFeature {
   text: string;
   included: boolean;
@@ -19,6 +25,8 @@ export interface Plan {
   cta: string;
   ctaVariant: "gradient" | "outline" | "secondary";
   highlighted: boolean;
+  stripePriceMonthly?: string;
+  stripePriceAnnual?: string;
 }
 
 export const PLANS: Plan[] = [
@@ -68,6 +76,8 @@ export const PLANS: Plan[] = [
     cta: "Passer à Pro",
     ctaVariant: "gradient",
     highlighted: true,
+    stripePriceMonthly: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY,
+    stripePriceAnnual: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_ANNUAL,
   },
   {
     id: "king",
@@ -91,6 +101,8 @@ export const PLANS: Plan[] = [
     cta: "Devenir King",
     ctaVariant: "secondary",
     highlighted: false,
+    stripePriceMonthly: process.env.NEXT_PUBLIC_STRIPE_PRICE_KING_MONTHLY,
+    stripePriceAnnual: process.env.NEXT_PUBLIC_STRIPE_PRICE_KING_ANNUAL,
   },
 ];
 

@@ -8,7 +8,7 @@ import {
 import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
 
-const appName = process.env.APP_NAME || 'FlowSlides';
+const appName = process.env.NEXT_PUBLIC_APP_NAME || 'FlowSlides';
 
 export default function CarouselLanding() {
   // Gestion dynamique de mounted

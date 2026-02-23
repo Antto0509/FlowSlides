@@ -4,7 +4,7 @@ export default function robots(): MetadataRoute.Robots {
     if (process.env.VERCEL_ENV !== "production") return { rules: [{ userAgent:"*", disallow:"/" }] }
     
     const base =
-        process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
+        process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ||
         "http://localhost:3000";
 
     return {
