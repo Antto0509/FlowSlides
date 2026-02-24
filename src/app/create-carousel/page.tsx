@@ -13,6 +13,7 @@ import {
   DEFAULT_THEMES,
 } from "@/types/carousel";
 import { Navigation } from "@/components/Navigation";
+import { Footer } from "@/components/Footer";
 
 // Mock hooks for fallback
 const generateMockHooks = (formData: CarouselFormData): Hook[] => [
@@ -178,6 +179,8 @@ export default function CreateCarousel() {
           />
         )}
       </div>
+
+      <Footer appName="FlowSlides" />
     </div>
   );
 }
