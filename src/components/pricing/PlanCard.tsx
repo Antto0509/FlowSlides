@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export function PlanCard({
   plan,
@@ -39,11 +40,16 @@ export function PlanCard({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ priceId }),
       });
-      const { url, error } = await res.json();
-      if (error) throw new Error(error);
+      const { url, error, status } = await res.json();
+      if (error) throw new Error(error, { cause: status });
       window.location.href = url;
     } catch (err) {
-      console.error("Erreur lors du checkout :", err);
+      // console.error("Erreur lors du checkout :", err);
+      if (err instanceof Error && err.cause === 401) {
+        window.location.href = "/login";
+        return;
+      }
+      toast.error("Une erreur est survenue. Veuillez réessayer.");
       setLoading(false);
     }
   };
@@ -52,11 +58,16 @@ export function PlanCard({
     setLoading(true);
     try {
       const res = await fetch("/api/stripe/portal", { method: "POST" });
-      const { url, error } = await res.json();
-      if (error) throw new Error(error);
+      const { url, error, status } = await res.json();
+      if (error) throw new Error(error, { cause: status });
       window.location.href = url;
     } catch (err) {
-      console.error("Erreur portail :", err);
+      // console.error("Erreur portail :", err);
+      if (err instanceof Error && err.cause === 401) {
+        window.location.href = "/login";
+        return;
+      }
+      toast.error("Une erreur est survenue. Veuillez réessayer.");
       setLoading(false);
     }
   };
