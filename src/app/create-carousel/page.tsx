@@ -12,6 +12,7 @@ import {
   CarouselTheme,
   DEFAULT_THEMES,
 } from "@/types/carousel";
+import { Navigation } from "@/components/Navigation";
 
 // Mock hooks for fallback
 const generateMockHooks = (formData: CarouselFormData): Hook[] => [
@@ -37,7 +38,7 @@ const generateMockHooks = (formData: CarouselFormData): Hook[] => [
 
 const generateMockSlides = (
   hook: Hook,
-  formData: CarouselFormData
+  formData: CarouselFormData,
 ): SlideContent[] => {
   const count = formData.slideCount;
 
@@ -143,7 +144,9 @@ export default function CreateCarousel() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container max-w-7xl mx-auto px-4 py-10">
+      <Navigation appName="FlowSlides" mounted={true} />
+      
+      <div className="container max-w-7xl mx-auto px-4 py-10 pt-30">
         <StepIndicator currentStep={step} />
 
         {step === 0 && (
@@ -166,8 +169,9 @@ export default function CreateCarousel() {
           <SlideEditor
             slides={slides}
             theme={theme}
-            format={formData.format}
-            authorName="@antto"
+            slideFormat={formData.format}
+            authorName="FlowSlides"
+            networks={formData.networks}
             onSlidesChange={setSlides}
             onThemeChange={setTheme}
             onBack={() => setStep(1)}

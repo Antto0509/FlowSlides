@@ -1,29 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
   SlideContent,
   CarouselTheme,
   SlideFormat,
+  SocialNetwork,
   DEFAULT_THEMES,
 } from "@/types/carousel";
 import SlidePreview from "./SlidePreview";
-import {
-  ArrowLeft,
-  ArrowRight,
-  ChevronLeft,
-  Download,
-  Palette,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, ChevronLeft, Palette } from "lucide-react";
 import { ScrollableThumbnails } from "./ScrollableThumbnails";
+import { ExportButtons, ExportFormat } from "./ExportButtons";
+import { exportAsPDF, exportAsPNG } from "@/hooks/useExport";
+import { toast } from "sonner";
 
 interface SlideEditorProps {
   slides: SlideContent[];
   theme: CarouselTheme;
-  format: SlideFormat;
+  slideFormat: SlideFormat;
   authorName: string;
+  networks: SocialNetwork[];
   onSlidesChange: (slides: SlideContent[]) => void;
   onThemeChange: (theme: CarouselTheme) => void;
   onBack: () => void;
@@ -32,47 +31,56 @@ interface SlideEditorProps {
 export default function SlideEditor({
   slides,
   theme,
-  format,
+  slideFormat,
   authorName,
+  networks,
   onSlidesChange,
   onThemeChange,
   onBack,
 }: SlideEditorProps) {
   const [activeSlide, setActiveSlide] = useState(0);
   const [showThemes, setShowThemes] = useState(false);
+  const [isExporting, setIsExporting] = useState<ExportFormat | false>(false);
+  const slideContainerRef = useRef<HTMLDivElement>(null);
 
-  const updateSlide = (
-    index: number,
-    field: "title" | "body",
-    value: string
-  ) => {
+  // — Édition des slides —
+
+  const updateSlide = (index: number, field: "title" | "body", value: string) => {
     const updated = [...slides];
-    updated[index] = {
-      ...updated[index],
-      [field]: value,
-    };
-
+    updated[index] = { ...updated[index], [field]: value };
     onSlidesChange(updated);
   };
 
   const updateBullet = (slideIndex: number, bulletIndex: number, value: string) => {
     const updated = [...slides];
     const current = updated[slideIndex];
-
     const bullets = [...(current.bulletPoints ?? [])];
     bullets[bulletIndex] = value;
-
-    updated[slideIndex] = {
-      ...current,
-      bulletPoints: bullets,
-    };
-
+    updated[slideIndex] = { ...current, bulletPoints: bullets };
     onSlidesChange(updated);
   };
 
-  const safeSlide =
-    slides.length > 0 ? slides[activeSlide] : null;
+  // — Export —
 
+  const handleExport = async (format: ExportFormat) => {
+    setIsExporting(format);
+    try {
+      if (format === "pdf") {
+        await exportAsPDF(slides, theme, slideFormat, authorName);
+      } else {
+        await exportAsPNG(slides, theme, slideFormat, authorName);
+      }
+    } catch (err) {
+      console.error("Export error:", err);
+      toast.error("Une erreur est survenue lors de l'export. Veuillez réessayer.");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  // — Garde-fou —
+
+  const safeSlide = slides.length > 0 ? slides[activeSlide] : null;
   if (!safeSlide) {
     return (
       <div className="text-center py-20 text-muted-foreground">
@@ -89,11 +97,9 @@ export default function SlideEditor({
           <Button variant="ghost" size="icon" onClick={onBack}>
             <ChevronLeft className="w-5 h-5" />
           </Button>
-
           <div>
             <h2 className="text-2xl font-bold tracking-tight">
-              Éditez vos{" "}
-              <span className="gradient-text">slides</span>
+              Éditez vos <span className="gradient-text">slides</span>
             </h2>
             <p className="text-sm text-muted-foreground">
               Cliquez sur le texte pour le modifier
@@ -111,13 +117,11 @@ export default function SlideEditor({
             Thèmes
           </Button>
 
-          <Button
-            className="gap-2 gradient-primary border-0"
-            type="button"
-          >
-            <Download className="w-4 h-4" />
-            Exporter
-          </Button>
+          <ExportButtons
+            networks={networks}
+            isExporting={isExporting}
+            onExport={handleExport}
+          />
         </div>
       </div>
 
@@ -137,10 +141,7 @@ export default function SlideEditor({
               title={t.name}
               type="button"
             >
-              <div
-                className="absolute inset-0"
-                style={{ backgroundColor: t.bgColor }}
-              />
+              <div className="absolute inset-0" style={{ backgroundColor: t.bgColor }} />
               <div
                 className="absolute bottom-0 left-0 right-0 h-1"
                 style={{ backgroundColor: t.accentColor }}
@@ -156,7 +157,7 @@ export default function SlideEditor({
           <ScrollableThumbnails
             slides={slides}
             theme={theme}
-            format={format}
+            format={slideFormat}
             authorName={authorName}
             activeSlide={activeSlide}
             setActiveSlide={setActiveSlide}
@@ -165,20 +166,16 @@ export default function SlideEditor({
 
         {/* Main preview */}
         <div className="flex flex-col items-center gap-6">
-          <div className="w-full flex justify-center">
+          <div className="w-full flex justify-center" ref={slideContainerRef}>
             <SlidePreview
               slide={safeSlide}
               theme={theme}
-              format={format}
+              format={slideFormat}
               slideIndex={activeSlide}
               totalSlides={slides.length}
               authorName={authorName}
-              onEditTitle={(val) =>
-                updateSlide(activeSlide, "title", val)
-              }
-              onEditBody={(val) =>
-                updateSlide(activeSlide, "body", val)
-              }
+              onEditTitle={(val) => updateSlide(activeSlide, "title", val)}
+              onEditBody={(val) => updateSlide(activeSlide, "body", val)}
               onEditBulletPoint={(bulletIndex, val) =>
                 updateBullet(activeSlide, bulletIndex, val)
               }
@@ -190,11 +187,7 @@ export default function SlideEditor({
             <Button
               variant="outline"
               size="icon"
-              onClick={() =>
-                setActiveSlide((prev) =>
-                  Math.max(0, prev - 1)
-                )
-              }
+              onClick={() => setActiveSlide((prev) => Math.max(0, prev - 1))}
               disabled={activeSlide === 0}
             >
               <ArrowLeft className="w-4 h-4" />
@@ -208,13 +201,9 @@ export default function SlideEditor({
               variant="outline"
               size="icon"
               onClick={() =>
-                setActiveSlide((prev) =>
-                  Math.min(slides.length - 1, prev + 1)
-                )
+                setActiveSlide((prev) => Math.min(slides.length - 1, prev + 1))
               }
-              disabled={
-                activeSlide === slides.length - 1
-              }
+              disabled={activeSlide === slides.length - 1}
             >
               <ArrowRight className="w-4 h-4" />
             </Button>
