@@ -21,17 +21,26 @@ import {
   Linkedin,
   Instagram,
   Square,
-  RectangleVertical
+  RectangleVertical,
+  Lock,
 } from "lucide-react";
+
+interface UsageInfo {
+  plan: string;
+  used: number;
+  limit: number;
+}
 
 interface CarouselFormProps {
   onSubmit: (data: CarouselFormData) => void;
   isLoading?: boolean;
+  usageInfo?: UsageInfo;
 }
 
 export default function CarouselForm({
   onSubmit,
   isLoading = false,
+  usageInfo,
 }: CarouselFormProps) {
   const [subject, setSubject] = useState("");
   const [audience, setAudience] = useState("");
@@ -51,8 +60,13 @@ export default function CarouselForm({
     );
   };
 
+  const isLimitReached =
+    usageInfo != null &&
+    usageInfo.limit !== Infinity &&
+    usageInfo.used >= usageInfo.limit;
+
   const handleSubmit = () => {
-    if (!subject.trim()) return;
+    if (!subject.trim() || isLimitReached) return;
 
     onSubmit({
       subject: subject.trim(),
@@ -75,6 +89,26 @@ export default function CarouselForm({
         <p className="text-muted-foreground text-lg">
           Générez des carrousels percutants en quelques clics grâce à l&apos;IA
         </p>
+        {usageInfo && usageInfo.limit !== Infinity && (
+          <div
+            className={cn(
+              "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium",
+              isLimitReached
+                ? "bg-destructive/10 text-destructive"
+                : "bg-muted text-muted-foreground"
+            )}
+          >
+            <span
+              className={cn(
+                "font-bold",
+                isLimitReached ? "text-destructive" : "text-foreground"
+              )}
+            >
+              {usageInfo.used}
+            </span>
+            <span>/ {usageInfo.limit} carrousels ce mois</span>
+          </div>
+        )}
       </div>
 
       <Card className="border-border/50 shadow-xl shadow-primary/5">
@@ -271,23 +305,39 @@ export default function CarouselForm({
           </div>
 
           {/* Submit */}
-          <Button
-            onClick={handleSubmit}
-            disabled={!subject.trim() || isLoading}
-            className="w-full h-14 text-lg font-semibold gradient-primary hover:opacity-90 transition-opacity border-0 shadow-lg shadow-primary/25"
-            size="lg"
-          >
-            {isLoading ? (
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                Génération en cours...
+          {isLimitReached ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 p-4 rounded-xl bg-destructive/5 border border-destructive/20 text-sm text-destructive">
+                <Lock className="w-4 h-4 shrink-0" />
+                <span>Vous avez atteint votre limite mensuelle de {usageInfo!.limit} carrousels.</span>
               </div>
-            ) : (
-              <>
-                Générer les hooks <Zap className="w-5 h-5 ml-1" />
-              </>
-            )}
-          </Button>
+              <Button
+                asChild
+                className="w-full h-14 text-lg font-semibold gradient-primary hover:opacity-90 transition-opacity border-0 shadow-lg shadow-primary/25"
+                size="lg"
+              >
+                <a href="/pricing">Passer à un plan supérieur</a>
+              </Button>
+            </div>
+          ) : (
+            <Button
+              onClick={handleSubmit}
+              disabled={!subject.trim() || isLoading}
+              className="w-full h-14 text-lg font-semibold gradient-primary hover:opacity-90 transition-opacity border-0 shadow-lg shadow-primary/25"
+              size="lg"
+            >
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                  Génération en cours...
+                </div>
+              ) : (
+                <>
+                  Générer les hooks <Zap className="w-5 h-5 ml-1" />
+                </>
+              )}
+            </Button>
+          )}
         </CardContent>
       </Card>
     </div>

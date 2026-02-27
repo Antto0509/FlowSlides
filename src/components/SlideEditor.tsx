@@ -11,11 +11,12 @@ import {
   DEFAULT_THEMES,
 } from "@/types/carousel";
 import SlidePreview from "./SlidePreview";
-import { ArrowLeft, ArrowRight, ChevronLeft, Palette } from "lucide-react";
+import { ArrowLeft, ArrowRight, ChevronLeft, Lock, Palette } from "lucide-react";
 import { ScrollableThumbnails } from "./ScrollableThumbnails";
 import { ExportButtons, ExportFormat } from "./ExportButtons";
 import { exportAsPDF, exportAsPNG } from "@/hooks/useExport";
 import { toast } from "sonner";
+import { canAccessTheme } from "@/types/pricing";
 
 interface SlideEditorProps {
   slides: SlideContent[];
@@ -23,6 +24,7 @@ interface SlideEditorProps {
   slideFormat: SlideFormat;
   authorName: string;
   networks: SocialNetwork[];
+  planThemeAccess?: "free" | "pro" | "king";
   onSlidesChange: (slides: SlideContent[]) => void;
   onThemeChange: (theme: CarouselTheme) => void;
   onBack: () => void;
@@ -34,6 +36,7 @@ export default function SlideEditor({
   slideFormat,
   authorName,
   networks,
+  planThemeAccess = "free",
   onSlidesChange,
   onThemeChange,
   onBack,
@@ -127,27 +130,45 @@ export default function SlideEditor({
 
       {/* Theme selector */}
       {showThemes && (
-        <div className="flex gap-3 p-4 rounded-xl bg-card border animate-in fade-in slide-in-from-top-2 duration-200">
-          {DEFAULT_THEMES.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => onThemeChange(t)}
-              className={cn(
-                "w-12 h-12 rounded-lg border-2 transition-all duration-200 relative overflow-hidden",
-                theme.id === t.id
-                  ? "border-primary scale-110 shadow-lg"
-                  : "border-transparent hover:border-primary/30"
-              )}
-              title={t.name}
-              type="button"
-            >
-              <div className="absolute inset-0" style={{ backgroundColor: t.bgColor }} />
-              <div
-                className="absolute bottom-0 left-0 right-0 h-1"
-                style={{ backgroundColor: t.accentColor }}
-              />
-            </button>
-          ))}
+        <div className="flex flex-wrap gap-3 p-4 rounded-xl bg-card border animate-in fade-in slide-in-from-top-2 duration-200">
+          {DEFAULT_THEMES.map((t) => {
+            const isLocked = !canAccessTheme(planThemeAccess, t.tier);
+            const planLabel = t.tier === "king" ? "King" : "Pro";
+            return (
+              <button
+                key={t.id}
+                onClick={() => {
+                  if (isLocked) {
+                    toast.error(`Thème réservé au plan ${planLabel}`, {
+                      action: { label: "Voir les plans", onClick: () => window.location.href = "/pricing" },
+                    });
+                    return;
+                  }
+                  onThemeChange(t);
+                }}
+                className={cn(
+                  "w-12 h-12 rounded-lg border-2 transition-all duration-200 relative overflow-hidden",
+                  theme.id === t.id
+                    ? "border-primary scale-110 shadow-lg"
+                    : "border-transparent hover:border-primary/30",
+                  isLocked && "opacity-50 cursor-not-allowed"
+                )}
+                title={isLocked ? `Plan ${planLabel} requis` : t.name}
+                type="button"
+              >
+                <div className="absolute inset-0" style={{ backgroundColor: t.bgColor }} />
+                <div
+                  className="absolute bottom-0 left-0 right-0 h-1"
+                  style={{ backgroundColor: t.accentColor }}
+                />
+                {isLocked && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                    <Lock className="w-3 h-3 text-white" />
+                  </div>
+                )}
+              </button>
+            );
+          })}
         </div>
       )}
 

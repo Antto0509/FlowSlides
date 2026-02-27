@@ -107,6 +107,35 @@ export const PLANS: Plan[] = [
   },
 ];
 
+export interface PlanLimits {
+  carouselsPerMonth: number; // Infinity = illimité
+  watermark: boolean;
+  advancedHooks: boolean;
+  customTheme: boolean;
+  themeAccess: "free" | "pro" | "king";
+}
+
+export const PLAN_LIMITS: Record<string, PlanLimits> = {
+  free:         { carouselsPerMonth: 5,        watermark: true,  advancedHooks: false, customTheme: false, themeAccess: "free" },
+  pro_monthly:  { carouselsPerMonth: 15,       watermark: false, advancedHooks: true,  customTheme: false, themeAccess: "pro"  },
+  pro_annual:   { carouselsPerMonth: 15,       watermark: false, advancedHooks: true,  customTheme: false, themeAccess: "pro"  },
+  king_monthly: { carouselsPerMonth: Infinity, watermark: false, advancedHooks: true,  customTheme: true,  themeAccess: "king" },
+  king_annual:  { carouselsPerMonth: Infinity, watermark: false, advancedHooks: true,  customTheme: true,  themeAccess: "king" },
+};
+
+export function getPlanLimits(plan: string | null | undefined): PlanLimits {
+  return PLAN_LIMITS[plan ?? "free"] ?? PLAN_LIMITS["free"];
+}
+
+const THEME_TIER_ORDER: Record<"free" | "pro" | "king", number> = { free: 0, pro: 1, king: 2 };
+
+export function canAccessTheme(
+  planAccess: "free" | "pro" | "king",
+  themeTier: "free" | "pro" | "king"
+): boolean {
+  return THEME_TIER_ORDER[planAccess] >= THEME_TIER_ORDER[themeTier];
+}
+
 export const FAQS = [
   {
     q: "Puis-je changer de plan à tout moment ?",

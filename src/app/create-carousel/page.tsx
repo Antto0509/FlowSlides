@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import StepIndicator from "@/components/StepIndicator";
 import CarouselForm from "@/components/CarouselForm";
 import HookSelection from "@/components/HookSelection";
@@ -14,6 +14,8 @@ import {
 } from "@/types/carousel";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
+import { toast } from "sonner";
+import { getPlanLimits } from "@/types/pricing";
 
 // Mock hooks for fallback
 const generateMockHooks = (formData: CarouselFormData): Hook[] => [
@@ -76,34 +78,40 @@ const generateMockSlides = (
   return slides;
 };
 
+class LimitReachedError extends Error {
+  constructor() { super('limit_reached'); }
+}
+
+class UnauthorizedError extends Error {
+  constructor() { super('unauthorized'); }
+}
+
 // Generate hooks using AI
 const generateHooks = async (formData: CarouselFormData): Promise<Hook[]> => {
-  try {
-    const response = await fetch('/api/hooks', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        subject: formData.subject,
-        audience: formData.audience,
-        tone: formData.tone,
-        goal: formData.goal,
-      }),
-    });
+  const response = await fetch('/api/hooks', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      subject: formData.subject,
+      audience: formData.audience,
+      tone: formData.tone,
+      goal: formData.goal,
+    }),
+  });
 
-    if (!response.ok) {
-      throw new Error('Failed to generate hooks');
-    }
+  if (response.status === 401) throw new UnauthorizedError();
+  if (response.status === 403) throw new LimitReachedError();
+  if (!response.ok) throw new Error('Failed to generate hooks');
 
-    const data = await response.json();
-    return data.hooks;
-  } catch (error) {
-    console.error('Error generating hooks with AI:', error);
-    // Fallback to mock hooks if API fails
-    return generateMockHooks(formData);
-  }
+  const data = await response.json();
+  return data.hooks;
 };
+
+interface UsageInfo {
+  plan: string;
+  used: number;
+  limit: number;
+}
 
 export default function CreateCarousel() {
   const [step, setStep] = useState(0);
@@ -112,6 +120,14 @@ export default function CreateCarousel() {
   const [slides, setSlides] = useState<SlideContent[]>([]);
   const [theme, setTheme] = useState<CarouselTheme>(DEFAULT_THEMES[0]);
   const [isLoading, setIsLoading] = useState(false);
+  const [usageInfo, setUsageInfo] = useState<UsageInfo | null>(null);
+
+  useEffect(() => {
+    fetch('/api/usage')
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => data && setUsageInfo(data))
+      .catch(() => null);
+  }, []);
 
   const handleFormSubmit = async (data: CarouselFormData) => {
     setFormData(data);
@@ -120,12 +136,23 @@ export default function CreateCarousel() {
     try {
       const generatedHooks = await generateHooks(data);
       setHooks(generatedHooks);
+      setUsageInfo((prev) => prev ? { ...prev, used: prev.used + 1 } : prev);
       setStep(1);
     } catch (error) {
-      console.error('Error in form submission:', error);
-      // En cas d'erreur, on utilise quand même les hooks mock
-      setHooks(generateMockHooks(data));
-      setStep(1);
+      if (error instanceof LimitReachedError) {
+        toast.error("Limite mensuelle atteinte", {
+          description: "Passez à un plan supérieur pour continuer à créer des carrousels.",
+          action: { label: "Voir les plans", onClick: () => window.location.href = "/pricing" },
+        });
+      } else if (error instanceof UnauthorizedError) {
+        toast.error("Connectez-vous pour générer des carrousels.", {
+          action: { label: "Se connecter", onClick: () => window.location.href = "/login" },
+        });
+      } else {
+        console.error('Error in form submission:', error);
+        setHooks(generateMockHooks(data));
+        setStep(1);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -154,6 +181,7 @@ export default function CreateCarousel() {
           <CarouselForm
             onSubmit={handleFormSubmit}
             isLoading={isLoading}
+            usageInfo={usageInfo ?? undefined}
           />
         )}
 
@@ -173,6 +201,7 @@ export default function CreateCarousel() {
             slideFormat={formData.format}
             authorName="FlowSlides"
             networks={formData.networks}
+            planThemeAccess={getPlanLimits(usageInfo?.plan).themeAccess}
             onSlidesChange={setSlides}
             onThemeChange={setTheme}
             onBack={() => setStep(1)}
