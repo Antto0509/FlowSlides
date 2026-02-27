@@ -11,10 +11,10 @@ const supabase = createClient(
 // Mappe un Price ID vers un nom de plan lisible
 function getPlanFromPriceId(priceId: string): string {
   const map: Record<string, string> = {
-    [process.env.STRIPE_PRICE_PRO_MONTHLY!]:  'pro_monthly',
-    [process.env.STRIPE_PRICE_PRO_ANNUAL!]:   'pro_annual',
-    [process.env.STRIPE_PRICE_KING_MONTHLY!]: 'king_monthly',
-    [process.env.STRIPE_PRICE_KING_ANNUAL!]:  'king_annual',
+    [process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY!]:  'pro_monthly',
+    [process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_ANNUAL!]:   'pro_annual',
+    [process.env.NEXT_PUBLIC_STRIPE_PRICE_KING_MONTHLY!]: 'king_monthly',
+    [process.env.NEXT_PUBLIC_STRIPE_PRICE_KING_ANNUAL!]:  'king_annual',
   }
   return map[priceId] ?? 'unknown'
 }

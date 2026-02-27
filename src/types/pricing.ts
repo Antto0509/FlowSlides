@@ -5,6 +5,7 @@ export type Subscription = {
   plan: string;
   status: string;
   stripe_customer_id: string | null;
+  current_period_end?: string | null;
 } | null;
 
 export interface PlanFeature {
