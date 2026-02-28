@@ -150,51 +150,79 @@ function buildSlideDOM(
 
   // — Content —
   const content = doc.createElement("div");
-  content.style.cssText =
-    "flex:1;display:flex;flex-direction:column;justify-content:center;gap:24px;padding:48px 0;";
 
-  const title = doc.createElement("h2");
-  title.style.cssText = `
-    font-size:${slide.type === "hook" ? "64px" : "52px"};
-    font-weight:700;line-height:1.2;
-    color:${theme.textColor};margin:0;
-  `;
-  title.textContent = slide.title;
-  content.appendChild(title);
+  if (slide.type === "hook" && slide.imageUrl) {
+    // Hook en mode image : image plein cadre, pas de texte
+    content.style.cssText =
+      "flex:1;overflow:hidden;border-radius:16px;min-height:0;";
+    const img = doc.createElement("img");
+    img.src = slide.imageUrl;
+    img.style.cssText = "width:100%;height:100%;object-fit:cover;display:block;";
+    content.appendChild(img);
+  } else {
+    content.style.cssText =
+      "flex:1;display:flex;flex-direction:column;justify-content:center;gap:24px;padding:48px 0;min-height:0;";
 
-  if (slide.body) {
-    const body = doc.createElement("p");
-    body.style.cssText = `font-size:28px;opacity:0.8;line-height:1.6;color:${theme.textColor};margin:0;`;
-    body.textContent = slide.body;
-    content.appendChild(body);
-  }
+    const title = doc.createElement("h2");
+    title.style.cssText = `
+      font-size:${slide.type === "hook" ? "64px" : "52px"};
+      font-weight:700;line-height:1.2;
+      color:${theme.textColor};margin:0;
+    `;
+    title.textContent = slide.title;
+    content.appendChild(title);
 
-  const bullets = slide.bulletPoints ?? [];
-  if (bullets.length > 0) {
-    const ul = doc.createElement("ul");
-    ul.style.cssText =
-      "list-style:none;padding:0;margin:16px 0 0;display:flex;flex-direction:column;gap:16px;";
+    if (slide.body) {
+      const body = doc.createElement("p");
+      body.style.cssText = `font-size:28px;opacity:0.8;line-height:1.6;color:${theme.textColor};margin:0;`;
+      body.textContent = slide.body;
+      content.appendChild(body);
+    }
 
-    bullets.forEach((point) => {
-      const li = doc.createElement("li");
-      li.style.cssText = "display:flex;align-items:flex-start;gap:16px;font-size:26px;";
+    // Bullets : uniquement content/CTA, respecte bulletPointsHidden
+    const bullets =
+      slide.type !== "hook" && !slide.bulletPointsHidden
+        ? (slide.bulletPoints ?? [])
+        : [];
+    if (bullets.length > 0) {
+      const ul = doc.createElement("ul");
+      ul.style.cssText =
+        "list-style:none;padding:0;margin:16px 0 0;display:flex;flex-direction:column;gap:16px;";
 
-      const dot = doc.createElement("span");
-      dot.style.cssText = `
-        width:12px;height:12px;border-radius:50%;
-        background:${theme.accentColor};flex-shrink:0;margin-top:8px;
-      `;
+      bullets.forEach((point) => {
+        const li = doc.createElement("li");
+        li.style.cssText = "display:flex;align-items:flex-start;gap:16px;font-size:26px;";
 
-      const text = doc.createElement("span");
-      text.style.cssText = `color:${theme.textColor};`;
-      text.textContent = point;
+        const dot = doc.createElement("span");
+        dot.style.cssText = `
+          width:12px;height:12px;border-radius:50%;
+          background:${theme.accentColor};flex-shrink:0;margin-top:8px;
+        `;
 
-      li.appendChild(dot);
-      li.appendChild(text);
-      ul.appendChild(li);
-    });
+        const text = doc.createElement("span");
+        text.style.cssText = `color:${theme.textColor};`;
+        text.textContent = point;
 
-    content.appendChild(ul);
+        li.appendChild(dot);
+        li.appendChild(text);
+        ul.appendChild(li);
+      });
+
+      content.appendChild(ul);
+    }
+
+    // Image pour les slides content/CTA
+    // h-40 preview (160px sur 400px) → 432px à 1080px (scale ×2.7)
+    if (slide.imageUrl) {
+      const imgContainer = doc.createElement("div");
+      imgContainer.style.cssText =
+        "width:100%;height:432px;flex-shrink:0;border-radius:16px;overflow:hidden;";
+      const img = doc.createElement("img");
+      img.src = slide.imageUrl;
+      img.style.cssText = "width:100%;height:100%;object-fit:cover;display:block;";
+      imgContainer.appendChild(img);
+      content.appendChild(imgContainer);
+    }
   }
 
   container.appendChild(content);
@@ -301,25 +329,28 @@ async function renderSlideToCanvas(
   // 5. Laisser le navigateur calculer les layouts
   await new Promise((resolve) => setTimeout(resolve, 100));
 
-  const badgeEl = container.querySelector("span"); // le texte du badge
-  const computed = iframe.contentWindow!.getComputedStyle(badgeEl!);
-  console.log({
-    lineHeight: computed.lineHeight,
-    fontSize: computed.fontSize,
-    height: computed.height,
-    fontFamily: computed.fontFamily,
-  });
+  // 6. Attendre le chargement de toutes les images (base64 ou URL)
+  const images = Array.from(iframeDoc.getElementsByTagName("img"));
+  await Promise.all(
+    images.map(
+      (img) =>
+        new Promise<void>((resolve) => {
+          if (img.complete) resolve();
+          else { img.onload = () => resolve(); img.onerror = () => resolve(); }
+        })
+    )
+  );
 
-  // 6. Capturer
+  // 7. Capturer
   const canvas = await html2canvas(container, {
     width: SLIDE_WIDTH,
     height: HEIGHT,
     scale: 1,
     useCORS: true,
+    allowTaint: true,
     backgroundColor: theme.bgColor,
     windowWidth: SLIDE_WIDTH,
     windowHeight: HEIGHT,
-    // ✅ Pointer vers le document de l'iframe
     scrollX: 0,
     scrollY: 0,
   });

@@ -27,6 +27,8 @@ export interface SlideContent {
   title: string;
   body: string;
   bulletPoints?: string[];
+  bulletPointsHidden?: boolean;
+  imageUrl?: string;
 }
 
 export interface CarouselTheme {

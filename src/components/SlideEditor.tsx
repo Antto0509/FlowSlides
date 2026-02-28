@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -11,7 +11,7 @@ import {
   DEFAULT_THEMES,
 } from "@/types/carousel";
 import SlidePreview from "./SlidePreview";
-import { ArrowLeft, ArrowRight, ChevronLeft, Lock, Palette } from "lucide-react";
+import { ArrowLeft, ArrowRight, ChevronLeft, Eye, EyeOff, ImageOff, ImagePlus, ListPlus, Lock, Palette } from "lucide-react";
 import { ScrollableThumbnails } from "./ScrollableThumbnails";
 import { ExportButtons, ExportFormat } from "./ExportButtons";
 import { exportAsPDF, exportAsPNG } from "@/hooks/useExport";
@@ -44,7 +44,14 @@ export default function SlideEditor({
   const [activeSlide, setActiveSlide] = useState(0);
   const [showThemes, setShowThemes] = useState(false);
   const [isExporting, setIsExporting] = useState<ExportFormat | false>(false);
+  const [showImagePlaceholder, setShowImagePlaceholder] = useState(false);
   const slideContainerRef = useRef<HTMLDivElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+
+  // Réinitialise le placeholder quand on change de slide
+  useEffect(() => {
+    setShowImagePlaceholder(false);
+  }, [activeSlide]);
 
   // — Édition des slides —
 
@@ -61,6 +68,52 @@ export default function SlideEditor({
     bullets[bulletIndex] = value;
     updated[slideIndex] = { ...current, bulletPoints: bullets };
     onSlidesChange(updated);
+  };
+
+  const toggleBulletsVisibility = (index: number) => {
+    const updated = [...slides];
+    updated[index] = { ...updated[index], bulletPointsHidden: !updated[index].bulletPointsHidden };
+    onSlidesChange(updated);
+  };
+
+  const removeBulletAt = (slideIndex: number, bulletIndex: number) => {
+    const updated = [...slides];
+    const current = updated[slideIndex];
+    const bullets = (current.bulletPoints ?? []).filter((_, i) => i !== bulletIndex);
+    updated[slideIndex] = { ...current, bulletPoints: bullets };
+    onSlidesChange(updated);
+  };
+
+  const MAX_BULLETS = 5;
+
+  const addBullet = (index: number) => {
+    const current = slides[index];
+    if ((current.bulletPoints ?? []).length >= MAX_BULLETS) {
+      toast.error(`Maximum ${MAX_BULLETS} bullets par slide`);
+      return;
+    }
+    const updated = [...slides];
+    const bullets = [...(current.bulletPoints ?? []), "Nouveau point"];
+    updated[index] = { ...current, bulletPoints: bullets, bulletPointsHidden: false };
+    onSlidesChange(updated);
+  };
+
+  const setSlideImage = (index: number, imageUrl: string | undefined) => {
+    const updated = [...slides];
+    updated[index] = { ...updated[index], imageUrl };
+    onSlidesChange(updated);
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      setSlideImage(activeSlide, reader.result as string);
+      setShowImagePlaceholder(false);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
   };
 
   // — Export —
@@ -200,7 +253,78 @@ export default function SlideEditor({
               onEditBulletPoint={(bulletIndex, val) =>
                 updateBullet(activeSlide, bulletIndex, val)
               }
+              onRemoveBulletPoint={(bulletIndex) =>
+                removeBulletAt(activeSlide, bulletIndex)
+              }
+              onAddImage={showImagePlaceholder ? () => imageInputRef.current?.click() : undefined}
             />
+          </div>
+
+          {/* Slide actions */}
+          <input
+            ref={imageInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleImageUpload}
+          />
+          <div className="flex items-center gap-2 flex-wrap justify-center">
+            {safeSlide.type !== "hook" && (safeSlide.bulletPoints ?? []).length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => toggleBulletsVisibility(activeSlide)}
+                className="gap-2"
+              >
+                {safeSlide.bulletPointsHidden
+                  ? <><Eye className="w-4 h-4" /> Afficher les bullets ({(safeSlide.bulletPoints ?? []).length})</>
+                  : <><EyeOff className="w-4 h-4" /> Masquer les bullets</>
+                }
+              </Button>
+            )}
+            {safeSlide.type !== "hook" && !safeSlide.bulletPointsHidden && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => addBullet(activeSlide)}
+                className="gap-2"
+              >
+                <ListPlus className="w-4 h-4" />
+                Ajouter un bullet
+              </Button>
+            )}
+            {safeSlide.imageUrl ? (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => imageInputRef.current?.click()}
+                  className="gap-2"
+                >
+                  <ImagePlus className="w-4 h-4" />
+                  Changer l'image
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSlideImage(activeSlide, undefined)}
+                  className="gap-2 text-destructive hover:text-destructive"
+                >
+                  <ImageOff className="w-4 h-4" />
+                  Retirer l'image
+                </Button>
+              </>
+            ) : (
+              <Button
+                variant={showImagePlaceholder ? "default" : "outline"}
+                size="sm"
+                onClick={() => setShowImagePlaceholder((prev) => !prev)}
+                className="gap-2"
+              >
+                <ImagePlus className="w-4 h-4" />
+                {showImagePlaceholder ? "Annuler" : "Ajouter une image"}
+              </Button>
+            )}
           </div>
 
           {/* Navigation */}
