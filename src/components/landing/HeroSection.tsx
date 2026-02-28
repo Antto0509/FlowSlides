@@ -244,6 +244,7 @@ export function HeroSection() {
                       textColor:   i === 0 ? '#0F172A' : '#FFFFFF',
                       accentColor: i === 0 ? '#7C3AED' : i === 1 ? '#EC4899' : '#FCD34D',
                       fontFamily: 'var(--font-space-grotesk), sans-serif',
+                      tier: 'free',
                     }}
                     format={i === 1 ? '4:5' : '1:1'}
                     slideIndex={i === 0 ? 0 : i === 1 ? 1 : 9}

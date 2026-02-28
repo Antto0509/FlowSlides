@@ -28,6 +28,7 @@ export const EXAMPLES: ExampleCarousel[] = [
       textColor: "#FFFFFF",
       accentColor: "#F43F5E",
       fontFamily: "Space Grotesk",
+      tier: "free",
     },
     tags: ["Personal branding", "Provocateur"],
     slides: [
@@ -51,6 +52,7 @@ export const EXAMPLES: ExampleCarousel[] = [
       textColor: "#0F172A",
       accentColor: "#3B82F6",
       fontFamily: "Inter",
+      tier: "free",
     },
     tags: ["Carrière", "Inspirant"],
     slides: [
@@ -74,6 +76,7 @@ export const EXAMPLES: ExampleCarousel[] = [
       textColor: "#78350F",
       accentColor: "#F59E0B",
       fontFamily: "Inter",
+      tier: "free",
     },
     tags: ["Lifestyle", "Éducatif"],
     slides: [
@@ -97,6 +100,7 @@ export const EXAMPLES: ExampleCarousel[] = [
       textColor: "#701A75",
       accentColor: "#D946EF",
       fontFamily: "Space Grotesk",
+      tier: "free",
     },
     tags: ["Food", "Lifestyle"],
     slides: [
@@ -120,6 +124,7 @@ export const EXAMPLES: ExampleCarousel[] = [
       textColor: "#F0F9FF",
       accentColor: "#38BDF8",
       fontFamily: "Space Grotesk",
+      tier: "free",
     },
     tags: ["Tech", "IA", "Éducatif"],
     slides: [
@@ -143,6 +148,7 @@ export const EXAMPLES: ExampleCarousel[] = [
       textColor: "#1A1A2E",
       accentColor: "#7C3AED",
       fontFamily: "Space Grotesk",
+      tier: "free",
     },
     tags: ["Voyage", "Budget"],
     slides: [
