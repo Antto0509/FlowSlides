@@ -6,6 +6,9 @@ import { Sparkles, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '@/components/ui/button';
 import ModeToggle from '@/components/ui/mode-toggle';
+import { User } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/client';
+import { logout } from '@/app/login/action';
 
 interface NavigationProps {
   appName?: string;
@@ -20,6 +23,18 @@ const navLinks = [
 export function Navigation({ appName = 'CarouselGen', mounted }: NavigationProps) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -74,14 +89,30 @@ export function Navigation({ appName = 'CarouselGen', mounted }: NavigationProps
                     {link.label}
                   </Link>
                 ))}
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="border-primary/20 hover:bg-primary/10 hover:border-primary/40 hover:text-primary transition-all duration-300"
-                  asChild
-                >
-                  <Link href="/login">Connexion</Link>
-                </Button>
+                {user ? (
+                  <>
+                    <Link href="/account" className="w-8 h-8 rounded-full bg-linear-to-br from-primary to-accent flex items-center justify-center text-primary-foreground text-xs font-bold hover:opacity-80 transition-opacity duration-200">
+                      {user.email?.[0].toUpperCase()}
+                    </Link>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-primary/20 hover:bg-primary/10 hover:border-primary/40 hover:text-primary transition-all duration-300"
+                      onClick={() => logout()}
+                    >
+                      Déconnexion
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="border-primary/20 hover:bg-primary/10 hover:border-primary/40 hover:text-primary transition-all duration-300"
+                    asChild
+                  >
+                    <Link href="/login">Connexion</Link>
+                  </Button>
+                )}
                 <ModeToggle />
               </div>
 
@@ -155,16 +186,32 @@ export function Navigation({ appName = 'CarouselGen', mounted }: NavigationProps
                     transition={{ delay: navLinks.length * 0.06, duration: 0.22 }}
                     className="pt-1"
                   >
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="w-full border-primary/20 hover:bg-primary/10 hover:border-primary/40 hover:text-primary transition-all duration-300"
-                      asChild
-                    >
-                      <Link href="/login" onClick={() => setMenuOpen(false)}>
-                        Connexion
-                      </Link>
-                    </Button>
+                    {user ? (
+                      <div className="flex items-center gap-2">
+                        <Link href="/account" onClick={() => setMenuOpen(false)} className="w-8 h-8 rounded-full bg-linear-to-br from-primary to-accent flex items-center justify-center text-primary-foreground text-xs font-bold shrink-0 hover:opacity-80 transition-opacity duration-200">
+                          {user.email?.[0].toUpperCase()}
+                        </Link>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="w-full border-primary/20 hover:bg-primary/10 hover:border-primary/40 hover:text-primary transition-all duration-300"
+                          onClick={() => { logout(); setMenuOpen(false); }}
+                        >
+                          Déconnexion
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="w-full border-primary/20 hover:bg-primary/10 hover:border-primary/40 hover:text-primary transition-all duration-300"
+                        asChild
+                      >
+                        <Link href="/login" onClick={() => setMenuOpen(false)}>
+                          Connexion
+                        </Link>
+                      </Button>
+                    )}
                   </motion.div>
                 </div>
               </motion.div>

@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
+import { cookies } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
+import { getPlanLimits } from '@/types/pricing';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -10,7 +13,44 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { subject, audience, tone, goal } = body;
 
-    // Get current date
+    // 1. Auth
+    const supabase = await createClient(cookies());
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+    }
+
+    // 2. Plan de l'utilisateur
+    const { data: subscription } = await supabase
+      .from('subscriptions')
+      .select('plan, status')
+      .eq('user_id', user.id)
+      .single();
+
+    const plan = (subscription?.status === 'active' ? subscription.plan : null) ?? 'free';
+    const limits = getPlanLimits(plan);
+
+    // 3. Vérification de la limite mensuelle
+    const month = new Date().toISOString().slice(0, 7); // "2026-02"
+    let currentCount = 0;
+
+    if (limits.carouselsPerMonth !== Infinity) {
+      const { data: usage } = await supabase
+        .from('usage')
+        .select('carousels_count')
+        .eq('user_id', user.id)
+        .eq('month', month)
+        .single();
+
+      currentCount = usage?.carousels_count ?? 0;
+
+      if (currentCount >= limits.carouselsPerMonth) {
+        return NextResponse.json({ error: 'limit_reached' }, { status: 403 });
+      }
+    }
+
+    // 4. Génération des hooks
     const currentDate = new Date();
     const currentYear = currentDate.getFullYear();
     const currentMonth = currentDate.toLocaleString('fr-FR', { month: 'long' });
@@ -74,12 +114,7 @@ Réponds UNIQUEMENT avec un JSON valide suivant ce format exact :
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 1000,
-      messages: [
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
+      messages: [{ role: 'user', content: prompt }],
     });
 
     const content = message.content[0];
@@ -87,13 +122,22 @@ Réponds UNIQUEMENT avec un JSON valide suivant ce format exact :
       throw new Error('Unexpected response type');
     }
 
-    // Parse the JSON response
     const jsonMatch = content.text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       throw new Error('No JSON found in response');
     }
 
     const result = JSON.parse(jsonMatch[0]);
+
+    // 5. Incrément du compteur d'usage
+    if (limits.carouselsPerMonth !== Infinity) {
+      await supabase
+        .from('usage')
+        .upsert(
+          { user_id: user.id, month, carousels_count: currentCount + 1 },
+          { onConflict: 'user_id,month' }
+        );
+    }
 
     return NextResponse.json(result);
   } catch (error) {
