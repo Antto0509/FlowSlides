@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { EditorHeader } from "./editor/EditorHeader";
 import { ThemeSelector } from "./editor/ThemeSelector";
 import { SlideActions } from "./editor/SlideActions";
+import { ReviewModal } from "./ReviewModal";
 
 interface SlideEditorProps {
   slides: SlideContent[];
@@ -56,6 +57,7 @@ export default function SlideEditor({
   const [activeSlide, setActiveSlide] = useState(0);
   const [showThemes, setShowThemes] = useState(false);
   const [isExporting, setIsExporting] = useState<ExportFormat | false>(false);
+  const [reviewOpen, setReviewOpen] = useState(false);
   const [showImagePlaceholder, setShowImagePlaceholder] = useState(false);
   const slideContainerRef = useRef<HTMLDivElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -138,6 +140,9 @@ export default function SlideEditor({
       } else {
         await exportAsPNG(slides, theme, slideFormat, authorName);
       }
+      toast.success("Export réussi !", {
+        action: { label: "Laisser un avis", onClick: () => setReviewOpen(true) },
+      });
     } catch (err) {
       console.error("Export error:", err);
       toast.error("Une erreur est survenue lors de l'export. Veuillez réessayer.");
@@ -159,6 +164,7 @@ export default function SlideEditor({
 
   return (
     <div className="w-full max-w-6xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <ReviewModal open={reviewOpen} onOpenChange={setReviewOpen} />
       <EditorHeader
         onBack={onBack}
         showThemes={showThemes}
