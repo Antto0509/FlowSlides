@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(xargs grep -l \"DEFAULT_THEMES\\\\|CarouselTheme\\\\|tier\")"
+      "Bash(xargs grep -l \"DEFAULT_THEMES\\\\|CarouselTheme\\\\|tier\")",
+      "Bash(npx shadcn@latest add dialog --yes)"
     ]
   }
 }

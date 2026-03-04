@@ -6,6 +6,8 @@ import { useRef } from 'react';
 import GradientText from '@/components/ui/react-bits/GradientText';
 import GlareHover from '@/components/ui/react-bits/GlareHover';
 
+const GLARE_COLORS: `#${string}`[] = ['#7C3AED', '#EC4899', '#FCD34D', '#10B981', '#3B82F6', '#F59E0B'];
+
 interface Testimonial {
   quote: string;
   author: string;
@@ -15,7 +17,15 @@ interface Testimonial {
   avatar: string;
 }
 
-const testimonials: Testimonial[] = [
+export interface ReviewRow {
+  id: string;
+  content: string;
+  author_name: string;
+  author_role: string | null;
+  author_company: string | null;
+}
+
+const fallbackTestimonials: Testimonial[] = [
   {
     quote: "J'ai doublé mon engagement LinkedIn en utilisant ces carrousels. L'interface est incroyablement intuitive et les résultats sont au rendez-vous dès la première semaine.",
     author: 'Marie Dubois',
@@ -42,6 +52,25 @@ const testimonials: Testimonial[] = [
   },
 ];
 
+function toInitials(name: string): string {
+  return name
+    .split(' ')
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? '')
+    .join('');
+}
+
+function rowsToTestimonials(rows: ReviewRow[]): Testimonial[] {
+  return rows.map((r, i) => ({
+    quote: r.content,
+    author: r.author_name,
+    role: r.author_role ?? '',
+    company: r.author_company ?? '',
+    glareColor: GLARE_COLORS[i % GLARE_COLORS.length],
+    avatar: toInitials(r.author_name),
+  }));
+}
+
 const containerVariants = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.12, delayChildren: 0.1 } },
@@ -64,9 +93,13 @@ const headingVariants = {
 
 interface TestimonialsSectionProps {
   appName: string;
+  reviews?: ReviewRow[];
 }
 
-export function TestimonialsSection({ appName }: TestimonialsSectionProps) {
+export function TestimonialsSection({ appName, reviews }: TestimonialsSectionProps) {
+  const testimonials =
+    reviews && reviews.length > 0 ? rowsToTestimonials(reviews) : fallbackTestimonials;
+
   const sectionRef = useRef<HTMLDivElement>(null);
   const headingRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: '-60px' });
