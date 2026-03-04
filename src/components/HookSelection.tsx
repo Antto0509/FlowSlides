@@ -20,6 +20,7 @@ interface HookSelectionProps {
   onSelect: (hook: Hook) => void;
   onBack: () => void;
   isLoading?: boolean;
+  aiGenerated?: boolean;
 }
 
 const STYLE_ICONS: Record<string, React.ReactNode> = {
@@ -43,6 +44,7 @@ export default function HookSelection({
   onSelect,
   onBack,
   isLoading = false,
+  aiGenerated = true,
 }: HookSelectionProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -79,6 +81,20 @@ export default function HookSelection({
           </p>
         </div>
       </div>
+
+      {/* Bannière upgrade pour les utilisateurs Free */}
+      {!aiGenerated && !isLoading && (
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-sm text-amber-700 dark:text-amber-400">
+          <Sparkles className="w-4 h-4 shrink-0 text-amber-500" />
+          <span>
+            Hooks générés par template.{" "}
+            <a href="/pricing" className="font-semibold underline underline-offset-2 hover:no-underline">
+              Passez à Pro
+            </a>{" "}
+            pour des hooks IA personnalisés.
+          </span>
+        </div>
+      )}
 
       {/* Loading skeleton */}
       {isLoading ? (

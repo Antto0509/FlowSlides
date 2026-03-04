@@ -50,7 +50,54 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 4. Génération des hooks
+    // 4a. Hooks template pour les utilisateurs Free (sans IA)
+    if (!limits.advancedHooks) {
+      if (limits.carouselsPerMonth !== Infinity) {
+        await supabase
+          .from('usage')
+          .upsert(
+            { user_id: user.id, month, carousels_count: currentCount + 1 },
+            { onConflict: 'user_id,month' }
+          );
+      }
+
+      const sub = audience ? `les ${audience}` : 'les gens';
+      const templateHooks = [
+        { id: '1', title: `Pourquoi 90% des ${sub} échouent en ${subject} ?`, subtitle: 'La réponse va vous surprendre...', style: 'question' },
+        { id: '2', title: `${subject} : les chiffres que personne ne vous montre`, subtitle: 'Données exclusives et analyse complète', style: 'statistic' },
+        { id: '3', title: `Arrêtez tout. Voici la vérité sur ${subject}.`, subtitle: 'Ce que les experts ne vous diront jamais', style: 'bold' },
+        { id: '4', title: `Comment j'ai transformé mon approche de ${subject}`, subtitle: "Mon histoire et les leçons que j'en ai tirées", style: 'story' },
+        { id: '5', title: `${subject} : tout ce qu'on vous dit est faux`, subtitle: 'Préparez-vous à remettre en question vos certitudes', style: 'controversial' },
+      ];
+
+      // Correction orthographique légère par l'IA (sans régénération créative)
+      try {
+        const correctionPrompt = `Corrige uniquement les fautes d'orthographe, de grammaire et de typographie française dans ces hooks. Ne change pas le sens, le style, ni la structure. Conserve les mots-clés du sujet tels quels (ex: "${subject}"). Réponds UNIQUEMENT avec le JSON corrigé, même format.
+
+${JSON.stringify({ hooks: templateHooks })}`;
+
+        const correctionMsg = await anthropic.messages.create({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 600,
+          messages: [{ role: 'user', content: correctionPrompt }],
+        });
+
+        const correctionContent = correctionMsg.content[0];
+        if (correctionContent.type === 'text') {
+          const jsonMatch = correctionContent.text.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            const corrected = JSON.parse(jsonMatch[0]);
+            return NextResponse.json({ hooks: corrected.hooks, aiGenerated: false });
+          }
+        }
+      } catch {
+        // En cas d'erreur, on retourne les templates bruts
+      }
+
+      return NextResponse.json({ hooks: templateHooks, aiGenerated: false });
+    }
+
+    // 4b. Génération des hooks IA (Pro+)
     const currentDate = new Date();
     const currentYear = currentDate.getFullYear();
     const currentMonth = currentDate.toLocaleString('fr-FR', { month: 'long' });
@@ -139,7 +186,7 @@ Réponds UNIQUEMENT avec un JSON valide suivant ce format exact :
         );
     }
 
-    return NextResponse.json(result);
+    return NextResponse.json({ ...result, aiGenerated: true });
   } catch (error) {
     console.error('Error generating hooks:', error);
     return NextResponse.json(

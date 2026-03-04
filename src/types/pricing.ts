@@ -111,16 +111,18 @@ export interface PlanLimits {
   carouselsPerMonth: number; // Infinity = illimité
   watermark: boolean;
   advancedHooks: boolean;
+  aiContent: boolean;
+  maxRegenerations: number; // régénérations de contenus IA par mois (0 = non disponible)
   customTheme: boolean;
   themeAccess: "free" | "pro" | "king";
 }
 
 export const PLAN_LIMITS: Record<string, PlanLimits> = {
-  free:         { carouselsPerMonth: 5,        watermark: true,  advancedHooks: false, customTheme: false, themeAccess: "free" },
-  pro_monthly:  { carouselsPerMonth: 15,       watermark: false, advancedHooks: true,  customTheme: false, themeAccess: "pro"  },
-  pro_annual:   { carouselsPerMonth: 15,       watermark: false, advancedHooks: true,  customTheme: false, themeAccess: "pro"  },
-  king_monthly: { carouselsPerMonth: Infinity, watermark: false, advancedHooks: true,  customTheme: true,  themeAccess: "king" },
-  king_annual:  { carouselsPerMonth: Infinity, watermark: false, advancedHooks: true,  customTheme: true,  themeAccess: "king" },
+  free:         { carouselsPerMonth: 5,        watermark: true,  advancedHooks: false, aiContent: false, maxRegenerations: 0,  customTheme: false, themeAccess: "free" },
+  pro_monthly:  { carouselsPerMonth: 15,       watermark: false, advancedHooks: true,  aiContent: false, maxRegenerations: 0,  customTheme: false, themeAccess: "pro"  },
+  pro_annual:   { carouselsPerMonth: 15,       watermark: false, advancedHooks: true,  aiContent: false, maxRegenerations: 0,  customTheme: false, themeAccess: "pro"  },
+  king_monthly: { carouselsPerMonth: Infinity, watermark: false, advancedHooks: true,  aiContent: true,  maxRegenerations: 30, customTheme: true,  themeAccess: "king" },
+  king_annual:  { carouselsPerMonth: Infinity, watermark: false, advancedHooks: true,  aiContent: true,  maxRegenerations: 30, customTheme: true,  themeAccess: "king" },
 };
 
 export function getPlanLimits(plan: string | null | undefined): PlanLimits {

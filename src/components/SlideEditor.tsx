@@ -25,10 +25,15 @@ interface SlideEditorProps {
   authorName: string;
   networks: SocialNetwork[];
   planThemeAccess?: "free" | "pro" | "king";
+  aiContentEnabled?: boolean;
+  regenerationsUsed?: number;
+  maxRegenerations?: number;
+  isRegenerating?: boolean;
   onSlidesChange: (slides: SlideContent[]) => void;
   onThemeChange: (theme: CarouselTheme) => void;
   onAuthorNameChange: (name: string) => void;
   onBack: () => void;
+  onRegenerateSlides?: () => void;
 }
 
 export default function SlideEditor({
@@ -38,10 +43,15 @@ export default function SlideEditor({
   authorName,
   networks,
   planThemeAccess = "free",
+  aiContentEnabled = false,
+  regenerationsUsed = 0,
+  maxRegenerations = 0,
+  isRegenerating = false,
   onSlidesChange,
   onThemeChange,
   onAuthorNameChange,
   onBack,
+  onRegenerateSlides,
 }: SlideEditorProps) {
   const [activeSlide, setActiveSlide] = useState(0);
   const [showThemes, setShowThemes] = useState(false);
@@ -156,6 +166,11 @@ export default function SlideEditor({
         networks={networks}
         isExporting={isExporting}
         onExport={handleExport}
+        aiContentEnabled={aiContentEnabled}
+        regenerationsUsed={regenerationsUsed}
+        maxRegenerations={maxRegenerations}
+        isRegenerating={isRegenerating}
+        onRegenerateSlides={onRegenerateSlides}
       />
 
       {showThemes && (
