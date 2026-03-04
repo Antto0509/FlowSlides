@@ -119,6 +119,7 @@ export default function CreateCarousel() {
   const [hooks, setHooks] = useState<Hook[]>([]);
   const [slides, setSlides] = useState<SlideContent[]>([]);
   const [theme, setTheme] = useState<CarouselTheme>(DEFAULT_THEMES[0]);
+  const [authorName, setAuthorName] = useState("FlowSlides");
   const [isLoading, setIsLoading] = useState(false);
   const [usageInfo, setUsageInfo] = useState<UsageInfo | null>(null);
 
@@ -199,11 +200,12 @@ export default function CreateCarousel() {
             slides={slides}
             theme={theme}
             slideFormat={formData.format}
-            authorName="FlowSlides"
+            authorName={authorName}
             networks={formData.networks}
             planThemeAccess={getPlanLimits(usageInfo?.plan).themeAccess}
             onSlidesChange={setSlides}
             onThemeChange={setTheme}
+            onAuthorNameChange={setAuthorName}
             onBack={() => setStep(1)}
           />
         )}

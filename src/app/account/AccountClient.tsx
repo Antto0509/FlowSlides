@@ -185,6 +185,22 @@ export function AccountClient({ user, subscription }: AccountClientProps) {
         </div>
       </div>
 
+      {/* Thème personnalisé (branding) (seulement pour les membres King) */}
+      {subscription?.plan?.startsWith('king') && (
+        <div className="rounded-2xl border border-border/50 bg-card p-6 mb-4">
+          <h2 className="font-semibold mb-4 flex items-center gap-2">
+            <Globe className="w-4 h-4" />
+            Thème personnalisé
+          </h2>
+          <p className="text-sm text-muted-foreground mb-4">
+            Vos couleurs et police personnalisées sont disponibles directement dans l&apos;éditeur de carrousel, via le menu <strong>Thèmes → Branding personnalisé</strong>.
+          </p>
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/create-carousel">Créer un carrousel</Link>
+          </Button>
+        </div>
+      )}
+
       {/* Déconnexion */}
       <Button
         variant="ghost"
