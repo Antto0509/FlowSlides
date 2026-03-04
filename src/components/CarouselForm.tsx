@@ -28,7 +28,7 @@ import {
 interface UsageInfo {
   plan: string;
   used: number;
-  limit: number;
+  limit: number; // -1 = unlimited
 }
 
 interface CarouselFormProps {
@@ -62,7 +62,7 @@ export default function CarouselForm({
 
   const isLimitReached =
     usageInfo != null &&
-    usageInfo.limit !== Infinity &&
+    usageInfo.limit !== -1 &&
     usageInfo.used >= usageInfo.limit;
 
   const handleSubmit = () => {
@@ -89,7 +89,7 @@ export default function CarouselForm({
         <p className="text-muted-foreground text-lg">
           Générez des carrousels percutants en quelques clics grâce à l&apos;IA
         </p>
-        {usageInfo && usageInfo.limit !== Infinity && (
+        {usageInfo && usageInfo.limit !== -1 && (
           <div
             className={cn(
               "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium",

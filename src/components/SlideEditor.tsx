@@ -2,21 +2,21 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import {
   SlideContent,
   CarouselTheme,
   SlideFormat,
   SocialNetwork,
-  DEFAULT_THEMES,
 } from "@/types/carousel";
 import SlidePreview from "./SlidePreview";
-import { ArrowLeft, ArrowRight, ChevronLeft, Eye, EyeOff, ImageOff, ImagePlus, ListPlus, Lock, Palette } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { ScrollableThumbnails } from "./ScrollableThumbnails";
-import { ExportButtons, ExportFormat } from "./ExportButtons";
+import { ExportFormat } from "./ExportButtons";
 import { exportAsPDF, exportAsPNG } from "@/hooks/useExport";
 import { toast } from "sonner";
-import { canAccessTheme } from "@/types/pricing";
+import { EditorHeader } from "./editor/EditorHeader";
+import { ThemeSelector } from "./editor/ThemeSelector";
+import { SlideActions } from "./editor/SlideActions";
 
 interface SlideEditorProps {
   slides: SlideContent[];
@@ -25,9 +25,15 @@ interface SlideEditorProps {
   authorName: string;
   networks: SocialNetwork[];
   planThemeAccess?: "free" | "pro" | "king";
+  aiContentEnabled?: boolean;
+  regenerationsUsed?: number;
+  maxRegenerations?: number;
+  isRegenerating?: boolean;
   onSlidesChange: (slides: SlideContent[]) => void;
   onThemeChange: (theme: CarouselTheme) => void;
+  onAuthorNameChange: (name: string) => void;
   onBack: () => void;
+  onRegenerateSlides?: () => void;
 }
 
 export default function SlideEditor({
@@ -37,9 +43,15 @@ export default function SlideEditor({
   authorName,
   networks,
   planThemeAccess = "free",
+  aiContentEnabled = false,
+  regenerationsUsed = 0,
+  maxRegenerations = 0,
+  isRegenerating = false,
   onSlidesChange,
   onThemeChange,
+  onAuthorNameChange,
   onBack,
+  onRegenerateSlides,
 }: SlideEditorProps) {
   const [activeSlide, setActiveSlide] = useState(0);
   const [showThemes, setShowThemes] = useState(false);
@@ -147,82 +159,28 @@ export default function SlideEditor({
 
   return (
     <div className="w-full max-w-6xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={onBack}>
-            <ChevronLeft className="w-5 h-5" />
-          </Button>
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">
-              Éditez vos <span className="gradient-text">slides</span>
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Cliquez sur le texte pour le modifier
-            </p>
-          </div>
-        </div>
+      <EditorHeader
+        onBack={onBack}
+        showThemes={showThemes}
+        onToggleThemes={() => setShowThemes((prev) => !prev)}
+        networks={networks}
+        isExporting={isExporting}
+        onExport={handleExport}
+        aiContentEnabled={aiContentEnabled}
+        regenerationsUsed={regenerationsUsed}
+        maxRegenerations={maxRegenerations}
+        isRegenerating={isRegenerating}
+        onRegenerateSlides={onRegenerateSlides}
+      />
 
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={() => setShowThemes((prev) => !prev)}
-            className="gap-2"
-          >
-            <Palette className="w-4 h-4" />
-            Thèmes
-          </Button>
-
-          <ExportButtons
-            networks={networks}
-            isExporting={isExporting}
-            onExport={handleExport}
-          />
-        </div>
-      </div>
-
-      {/* Theme selector */}
       {showThemes && (
-        <div className="flex flex-wrap gap-3 p-4 rounded-xl bg-card border animate-in fade-in slide-in-from-top-2 duration-200">
-          {DEFAULT_THEMES.map((t) => {
-            const isLocked = !canAccessTheme(planThemeAccess, t.tier);
-            const planLabel = t.tier === "king" ? "King" : "Pro";
-            return (
-              <button
-                key={t.id}
-                onClick={() => {
-                  if (isLocked) {
-                    toast.error(`Thème réservé au plan ${planLabel}`, {
-                      action: { label: "Voir les plans", onClick: () => window.location.href = "/pricing" },
-                    });
-                    return;
-                  }
-                  onThemeChange(t);
-                }}
-                className={cn(
-                  "w-12 h-12 rounded-lg border-2 transition-all duration-200 relative overflow-hidden",
-                  theme.id === t.id
-                    ? "border-primary scale-110 shadow-lg"
-                    : "border-transparent hover:border-primary/30",
-                  isLocked && "opacity-50 cursor-not-allowed"
-                )}
-                title={isLocked ? `Plan ${planLabel} requis` : t.name}
-                type="button"
-              >
-                <div className="absolute inset-0" style={{ backgroundColor: t.bgColor }} />
-                <div
-                  className="absolute bottom-0 left-0 right-0 h-1"
-                  style={{ backgroundColor: t.accentColor }}
-                />
-                {isLocked && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                    <Lock className="w-3 h-3 text-white" />
-                  </div>
-                )}
-              </button>
-            );
-          })}
-        </div>
+        <ThemeSelector
+          theme={theme}
+          planThemeAccess={planThemeAccess}
+          authorName={authorName}
+          onThemeChange={onThemeChange}
+          onAuthorNameChange={onAuthorNameChange}
+        />
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-8">
@@ -260,72 +218,17 @@ export default function SlideEditor({
             />
           </div>
 
-          {/* Slide actions */}
-          <input
-            ref={imageInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleImageUpload}
+          <SlideActions
+            slide={safeSlide}
+            showImagePlaceholder={showImagePlaceholder}
+            onToggleImagePlaceholder={() => setShowImagePlaceholder((prev) => !prev)}
+            onToggleBullets={() => toggleBulletsVisibility(activeSlide)}
+            onAddBullet={() => addBullet(activeSlide)}
+            onChangeImage={() => imageInputRef.current?.click()}
+            onRemoveImage={() => setSlideImage(activeSlide, undefined)}
+            onImageUpload={handleImageUpload}
+            imageInputRef={imageInputRef}
           />
-          <div className="flex items-center gap-2 flex-wrap justify-center">
-            {safeSlide.type !== "hook" && (safeSlide.bulletPoints ?? []).length > 0 && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => toggleBulletsVisibility(activeSlide)}
-                className="gap-2"
-              >
-                {safeSlide.bulletPointsHidden
-                  ? <><Eye className="w-4 h-4" /> Afficher les bullets ({(safeSlide.bulletPoints ?? []).length})</>
-                  : <><EyeOff className="w-4 h-4" /> Masquer les bullets</>
-                }
-              </Button>
-            )}
-            {safeSlide.type !== "hook" && !safeSlide.bulletPointsHidden && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => addBullet(activeSlide)}
-                className="gap-2"
-              >
-                <ListPlus className="w-4 h-4" />
-                Ajouter un bullet
-              </Button>
-            )}
-            {safeSlide.imageUrl ? (
-              <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => imageInputRef.current?.click()}
-                  className="gap-2"
-                >
-                  <ImagePlus className="w-4 h-4" />
-                  Changer l'image
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setSlideImage(activeSlide, undefined)}
-                  className="gap-2 text-destructive hover:text-destructive"
-                >
-                  <ImageOff className="w-4 h-4" />
-                  Retirer l'image
-                </Button>
-              </>
-            ) : (
-              <Button
-                variant={showImagePlaceholder ? "default" : "outline"}
-                size="sm"
-                onClick={() => setShowImagePlaceholder((prev) => !prev)}
-                className="gap-2"
-              >
-                <ImagePlus className="w-4 h-4" />
-                {showImagePlaceholder ? "Annuler" : "Ajouter une image"}
-              </Button>
-            )}
-          </div>
 
           {/* Navigation */}
           <div className="flex items-center gap-4">

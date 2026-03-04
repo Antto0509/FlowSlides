@@ -31,6 +31,6 @@ export async function GET() {
   return NextResponse.json({
     plan,
     used: usage?.carousels_count ?? 0,
-    limit: limits.carouselsPerMonth,
+    limit: limits.carouselsPerMonth === Infinity ? -1 : limits.carouselsPerMonth,
   });
 }
