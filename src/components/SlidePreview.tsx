@@ -105,25 +105,15 @@ export default function SlidePreview({
       )}>
         {isThumbnail ? (
           // — Thumbnail —
-          slide.type === "hook" && slide.imageUrl ? (
-            // Hook en mode image : uniquement l'image
-            <img src={slide.imageUrl} alt="" className="w-full h-full rounded object-cover" />
-          ) : (
-            <>
-              <h3 className="font-bold leading-tight text-[10px]">{slide.title}</h3>
-              {slide.body && (
-                <p className="opacity-70 leading-snug text-[8px] line-clamp-3">{slide.body}</p>
-              )}
-              {slide.imageUrl && slide.type !== "hook" && (
-                <img src={slide.imageUrl} alt="" className="w-full rounded object-cover max-h-7.5" />
-              )}
-            </>
-          )
-        ) : slide.type === "hook" && slide.imageUrl ? (
-          // — Full view · Hook en mode image : uniquement l'image plein cadre —
-          <div className="flex-1 min-h-0 rounded-lg overflow-hidden">
-            <img src={slide.imageUrl} alt="" className="w-full h-full object-cover" />
-          </div>
+          <>
+            <h3 className="font-bold leading-tight text-[10px]">{slide.title}</h3>
+            {slide.body && slide.type !== "hook" && (
+              <p className="opacity-70 leading-snug text-[8px] line-clamp-3">{slide.body}</p>
+            )}
+            {slide.imageUrl && (
+              <img src={slide.imageUrl} alt="" className="w-full rounded object-cover max-h-7.5" />
+            )}
+          </>
         ) : (
           // — Full view · Mode texte (hook sans image) ou content/CTA —
           <>
@@ -135,7 +125,9 @@ export default function SlidePreview({
               }
               className={cn(
                 "font-bold leading-tight outline-none",
-                slide.type === "hook" ? "text-2xl" : "text-xl",
+                slide.type === "hook"
+                  ? (slide.imageUrl || onAddImage) ? "text-3xl" : "text-5xl"
+                  : "text-xl",
                 onEditTitle &&
                   "hover:ring-1 hover:ring-primary/30 rounded px-1 -mx-1 focus:ring-2 focus:ring-primary/50"
               )}
@@ -183,7 +175,7 @@ export default function SlidePreview({
                         className={cn(
                           "outline-none flex-1",
                           onEditBulletPoint &&
-                            "hover:ring-1 hover:ring-primary/30 rounded px-1 -mx-1 focus:ring-2 focus:ring-primary/50"
+                            "hover:ring-1 hover:ring-primary/30 rounded px-1 -m-1 mb-1 focus:ring-2 focus:ring-primary/50"
                         )}
                       >
                         {point}
