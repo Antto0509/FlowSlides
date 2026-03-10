@@ -127,7 +127,7 @@ function buildSlideDOM(
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding: 80px;
+    padding: 65px;
     box-sizing: border-box;
   `;
 
@@ -151,78 +151,68 @@ function buildSlideDOM(
   // — Content —
   const content = doc.createElement("div");
 
-  if (slide.type === "hook" && slide.imageUrl) {
-    // Hook en mode image : image plein cadre, pas de texte
-    content.style.cssText =
-      "flex:1;overflow:hidden;border-radius:16px;min-height:0;";
+  content.style.cssText =
+    "flex:1;display:flex;flex-direction:column;justify-content:center;gap:32px;padding:43px 0;min-height:0;";
+
+  const title = doc.createElement("h2");
+  title.style.cssText = `
+    font-size:${slide.type === "hook" ? (slide.imageUrl ? "81px" : "130px") : "52px"};
+    font-weight:700;line-height:1.2;
+    color:${theme.textColor};margin:0;
+  `;
+  title.textContent = slide.title;
+  content.appendChild(title);
+
+  if (slide.body) {
+    const body = doc.createElement("p");
+    body.style.cssText = `font-size:38px;opacity:0.8;line-height:1.6;color:${theme.textColor};margin:0;`;
+    body.textContent = slide.body;
+    content.appendChild(body);
+  }
+
+  // Bullets : uniquement content/CTA, respecte bulletPointsHidden
+  const bullets =
+    slide.type !== "hook" && !slide.bulletPointsHidden
+      ? (slide.bulletPoints ?? [])
+      : [];
+  if (bullets.length > 0) {
+    const ul = doc.createElement("ul");
+    ul.style.cssText =
+      "list-style:none;padding:0;margin:22px 0 0;display:flex;flex-direction:column;gap:22px;";
+
+    bullets.forEach((point) => {
+      const li = doc.createElement("li");
+      li.style.cssText = "display:flex;align-items:flex-start;gap:22px;font-size:38px;";
+
+      const dot = doc.createElement("span");
+      dot.style.cssText = `
+        width:16px;height:16px;border-radius:50%;
+        background:${theme.accentColor};flex-shrink:0;margin-top:15px;
+      `;
+
+      const text = doc.createElement("span");
+      text.style.cssText = `color:${theme.textColor};margin-top:-11px;`;
+      text.textContent = point;
+
+      li.appendChild(dot);
+      li.appendChild(text);
+      ul.appendChild(li);
+    });
+
+    content.appendChild(ul);
+  }
+
+  // Image (tous types, hook inclus)
+  // h-40 preview (160px sur 400px) → 432px à 1080px (scale ×2.7)
+  if (slide.imageUrl) {
+    const imgContainer = doc.createElement("div");
+    imgContainer.style.cssText =
+      "width:100%;height:432px;flex-shrink:0;border-radius:16px;overflow:hidden;";
     const img = doc.createElement("img");
     img.src = slide.imageUrl;
     img.style.cssText = "width:100%;height:100%;object-fit:cover;display:block;";
-    content.appendChild(img);
-  } else {
-    content.style.cssText =
-      "flex:1;display:flex;flex-direction:column;justify-content:center;gap:24px;padding:48px 0;min-height:0;";
-
-    const title = doc.createElement("h2");
-    title.style.cssText = `
-      font-size:${slide.type === "hook" ? "64px" : "52px"};
-      font-weight:700;line-height:1.2;
-      color:${theme.textColor};margin:0;
-    `;
-    title.textContent = slide.title;
-    content.appendChild(title);
-
-    if (slide.body) {
-      const body = doc.createElement("p");
-      body.style.cssText = `font-size:28px;opacity:0.8;line-height:1.6;color:${theme.textColor};margin:0;`;
-      body.textContent = slide.body;
-      content.appendChild(body);
-    }
-
-    // Bullets : uniquement content/CTA, respecte bulletPointsHidden
-    const bullets =
-      slide.type !== "hook" && !slide.bulletPointsHidden
-        ? (slide.bulletPoints ?? [])
-        : [];
-    if (bullets.length > 0) {
-      const ul = doc.createElement("ul");
-      ul.style.cssText =
-        "list-style:none;padding:0;margin:16px 0 0;display:flex;flex-direction:column;gap:16px;";
-
-      bullets.forEach((point) => {
-        const li = doc.createElement("li");
-        li.style.cssText = "display:flex;align-items:flex-start;gap:16px;font-size:26px;";
-
-        const dot = doc.createElement("span");
-        dot.style.cssText = `
-          width:12px;height:12px;border-radius:50%;
-          background:${theme.accentColor};flex-shrink:0;margin-top:8px;
-        `;
-
-        const text = doc.createElement("span");
-        text.style.cssText = `color:${theme.textColor};`;
-        text.textContent = point;
-
-        li.appendChild(dot);
-        li.appendChild(text);
-        ul.appendChild(li);
-      });
-
-      content.appendChild(ul);
-    }
-
-    // Image pour les slides content/CTA
-    // h-40 preview (160px sur 400px) → 432px à 1080px (scale ×2.7)
-    if (slide.imageUrl) {
-      const imgContainer = doc.createElement("div");
-      imgContainer.style.cssText =
-        "width:100%;height:432px;flex-shrink:0;border-radius:16px;overflow:hidden;";
-      const img = doc.createElement("img");
-      img.src = slide.imageUrl;
-      img.style.cssText = "width:100%;height:100%;object-fit:cover;display:block;";
-      imgContainer.appendChild(img);
-      content.appendChild(imgContainer);
-    }
+    imgContainer.appendChild(img);
+    content.appendChild(imgContainer);
   }
 
   container.appendChild(content);
